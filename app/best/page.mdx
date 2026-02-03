@@ -9,7 +9,7 @@ export const metadata = {
   description: 'Our expert guide to the best automatic litter boxes for cats. We tested 15+ models to find the top performers for odor control, safety, and value.',
 };
 
-<div className="bg-[#F5F4F1] min-h-screen font-sans">
+<div className="bg-surface-bg min-h-screen font-sans">
   {/* Hero Section */}
   <section className="bg-white py-[80px] px-6 lg:px-20 border-b border-[#E5E4E1] animate-fade-in relative z-10 text-center">
     <div className="max-w-7xl mx-auto flex flex-col items-center gap-8">
@@ -17,13 +17,13 @@ export const metadata = {
          <span className="text-[14px] font-bold uppercase tracking-wider">Expert Picks 2026</span>
       </div>
       
-      <h1 className="text-[52px] font-bold text-[#1A1918] leading-[1.1] tracking-tight max-w-[800px]">
+      <h1 className="text-[52px] font-bold text-text-primary leading-[1.1] tracking-tight max-w-[800px]">
         Best Automatic<br />Litter Boxes in 2026
       </h1>
       
-      <p className="text-[20px] text-[#6D6C6A] max-w-2xl font-normal leading-relaxed">
+      <div className="text-[20px] text-text-secondary max-w-2xl font-normal leading-relaxed">
         Our experts spent 500+ hours testing 20+ automatic litter boxes to find the absolute best options for every cat and home.
-      </p>
+      </div>
 
       <div className="flex items-center gap-6 mt-4">
         <div className="flex -space-x-3">
@@ -34,8 +34,8 @@ export const metadata = {
           ))}
         </div>
         <div className="text-left">
-           <div className="text-[14px] font-bold text-[#1A1918]">Tested by a team of experts</div>
-           <div className="text-[13px] text-[#9C9B99] font-medium leading-tight">6 months of real-world home testing</div>
+           <div className="text-[14px] font-bold text-text-primary">Tested by a team of experts</div>
+           <div className="text-[13px] text-text-muted font-medium leading-tight">6 months of real-world home testing</div>
         </div>
       </div>
     </div>
@@ -47,8 +47,8 @@ export const metadata = {
         <div className="flex items-center gap-4 mb-12">
            <div className="w-12 h-12 bg-[#3D8A5A] rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">1</div>
            <div>
-              <h2 className="text-[32px] font-bold text-[#1A1918]">Overall Best Automatic Litter Box</h2>
-              <p className="text-[#6D6C6A] font-medium">The most reliable, quiet, and user-friendly model we tested.</p>
+              <h2 className="text-[32px] font-bold text-text-primary">Overall Best Automatic Litter Box</h2>
+              <p className="text-text-secondary font-medium">The most reliable, quiet, and user-friendly model we tested.</p>
            </div>
         </div>
         <ProductCard product={products[0]} variant="horizontal" />
@@ -59,8 +59,8 @@ export const metadata = {
         <div className="flex items-center gap-4 mb-12">
            <div className="w-12 h-12 bg-[#D89575] rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">2</div>
            <div>
-              <h2 className="text-[32px] font-bold text-[#1A1918]">Best for Small Apartments</h2>
-              <p className="text-[#6D6C6A] font-medium">Compact footprint with advanced odor-sealing technology.</p>
+              <h2 className="text-[32px] font-bold text-text-primary">Best for Small Apartments</h2>
+              <p className="text-text-secondary font-medium">Compact footprint with advanced odor-sealing technology.</p>
            </div>
         </div>
         <ProductCard product={products[1]} variant="horizontal" />
@@ -71,8 +71,8 @@ export const metadata = {
         <div className="flex items-center gap-4 mb-12">
            <div className="w-12 h-12 bg-[#1A1918] rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">3</div>
            <div>
-              <h2 className="text-[32px] font-bold text-[#1A1918]">Best Budget Entry Pick</h2>
-              <p className="text-[#6D6C6A] font-medium">Excellent performance without the premium price tag.</p>
+              <h2 className="text-[32px] font-bold text-text-primary">Best Budget Entry Pick</h2>
+              <p className="text-text-secondary font-medium">Excellent performance without the premium price tag.</p>
            </div>
         </div>
         <ProductCard product={products[2]} variant="horizontal" />
@@ -81,18 +81,18 @@ export const metadata = {
      {/* Comparison Section */}
      <section className="bg-white rounded-[40px] p-12 border border-[#E5E4E1]">
         <div className="text-center mb-16">
-           <h2 className="text-[32px] font-bold text-[#1A1918] mb-4">Quick Technical Comparison</h2>
-           <p className="text-[#6D6C6A] font-medium">See how our top 3 recommendations stack up side-by-side.</p>
+           <h2 className="text-[32px] font-bold text-text-primary mb-4">Quick Technical Comparison</h2>
+           <div className="text-text-secondary font-medium">See how our top 3 recommendations stack up side-by-side.</div>
         </div>
         <ComparisonTable products={products.slice(0, 3)} />
      </section>
 
      {/* FAQ/Conclusion Section */}
      <section className="max-w-4xl mx-auto text-center py-12">
-        <h2 className="text-[32px] font-bold text-[#1A1918] mb-8">Ready to ditch the scoop?</h2>
-        <p className="text-[18px] text-[#6D6C6A] leading-relaxed font-medium mb-12">
+        <h2 className="text-[32px] font-bold text-text-primary mb-8">Ready to ditch the scoop?</h2>
+        <div className="text-[18px] text-text-secondary leading-relaxed font-medium mb-12">
            Investing in the right automatic litter box is one of the best things you can do for your home's hygiene. Any of our top picks will provide a cleaner, fresher environment for both you and your cats.
-        </p>
+        </div>
         <Link href="#overall-best" className="inline-flex items-center gap-2 px-10 py-5 bg-[#3D8A5A] text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all active:scale-95">
            Back to #1 Choice
            <ArrowUp className="w-5 h-5" />

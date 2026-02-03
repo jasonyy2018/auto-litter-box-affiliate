@@ -1,0 +1,10 @@
+// Export components for use in MDX files
+export { default as ComparisonTable } from './ComparisonTable';
+export { default as ProductCard } from './ProductCard';
+export { default as ProsCons } from './ProsCons';
+export { default as Rating } from './Rating';
+export { default as BuyButton } from './BuyButton';
+export { default as FAQ } from './FAQ';
+export { default as TOC } from './TOC';
+export { default as Header } from './Header';
+export { default as Footer } from './Footer';

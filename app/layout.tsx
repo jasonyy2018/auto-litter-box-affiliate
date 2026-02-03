@@ -53,6 +53,23 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              var _paq = window._paq = window._paq || [];
+              /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+              _paq.push(['trackPageView']);
+              _paq.push(['enableLinkTracking']);
+              (function() {
+                var u="//matomo.wisdomitc.com/";
+                _paq.push(['setTrackerUrl', u+'matomo.php']);
+                _paq.push(['setSiteId', '6']);
+                var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+                g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+              })();
+            `,
+          }}
+        />
       </head>
       <body className={`${outfit.variable} min-h-screen flex flex-col font-sans antialiased text-text-primary bg-white`} suppressHydrationWarning>
         <Header />

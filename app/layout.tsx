@@ -54,7 +54,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body className={`${outfit.variable} min-h-screen flex flex-col font-sans antialiased text-text-primary bg-white`}>
+      <body className={`${outfit.variable} min-h-screen flex flex-col font-sans antialiased text-text-primary bg-white`} suppressHydrationWarning>
         <Header />
         <main className="grow">{children}</main>
         <Footer />

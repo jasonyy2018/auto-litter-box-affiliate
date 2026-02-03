@@ -26,35 +26,35 @@ export const blogPosts: Record<string, BlogPost> = {
         ],
         content: (
             <div className="space-y-16">
-                <div className="bg-[#F0FDF4] p-10 rounded-[32px] border border-[#C8F0D8] shadow-sm">
-                    <p className="text-[#3D8A5A] font-bold leading-relaxed italic text-xl">
+                <div className="bg-surface-bg p-10 rounded-[32px] border border-[#C8F0D8] shadow-sm">
+                    <p className="text-primary-600 font-bold leading-relaxed italic text-xl">
                         &quot;The biggest benefit isn&apos;t just the lack of scooping—it&apos;s the consistent cleanliness for your cat. Every time they step in, it&apos;s fresh.&quot;
                     </p>
                 </div>
 
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">The Real Cost Breakdown</h2>
-                    <p className="text-lg text-[#6D6C6A] mb-10 font-medium leading-relaxed">While the initial price is higher, clumping litter efficiency often saves money in the long run.</p>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">The Real Cost Breakdown</h2>
+                    <p className="text-lg text-text-secondary mb-10 font-medium leading-relaxed">While the initial price is higher, clumping litter efficiency often saves money in the long run.</p>
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="bg-white p-10 rounded-[40px] border border-[#E5E4E1] shadow-sm">
-                            <div className="text-[10px] font-bold text-[#9C9B99] uppercase mb-8 tracking-[3px]">Traditional Box</div>
+                            <div className="text-[10px] font-bold text-text-muted uppercase mb-8 tracking-[3px]">Traditional Box</div>
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center pb-4 border-b border-gray-50">
-                                    <span className="text-sm font-bold text-[#6D6C6A]">Monthly Litter</span>
-                                    <span className="text-xl font-bold text-[#1A1918]">$25</span>
+                                    <span className="text-sm font-bold text-text-secondary">Monthly Litter</span>
+                                    <span className="text-xl font-bold text-text-primary">$25</span>
                                 </div>
                                 <div className="flex justify-between items-center pb-4 border-b border-gray-50">
-                                    <span className="text-sm font-bold text-[#6D6C6A]">Annual Replacements</span>
-                                    <span className="text-xl font-bold text-[#1A1918]">$40</span>
+                                    <span className="text-sm font-bold text-text-secondary">Annual Replacements</span>
+                                    <span className="text-xl font-bold text-text-primary">$40</span>
                                 </div>
                                 <div className="pt-2 flex justify-between items-center">
-                                    <span className="text-lg font-bold text-[#1A1918]">Annual Total</span>
-                                    <span className="text-2xl font-bold text-[#1A1918]">$340</span>
+                                    <span className="text-lg font-bold text-text-primary">Annual Total</span>
+                                    <span className="text-2xl font-bold text-text-primary">$340</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-[#3D8A5A] p-10 rounded-[40px] text-white shadow-xl">
+                        <div className="bg-primary-600 p-10 rounded-[40px] text-white shadow-xl">
                             <div className="text-[10px] font-bold text-[#C8F0D8] uppercase mb-8 tracking-[3px]">Automatic Box</div>
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center pb-4 border-b border-[#FFFFFF20]">
@@ -75,27 +75,27 @@ export const blogPosts: Record<string, BlogPost> = {
                 </section>
 
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-12 text-center">Who Should (and Shouldn&apos;t) Buy One</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-12 text-center">Who Should (and Shouldn&apos;t) Buy One</h2>
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="bg-white p-12 rounded-[40px] border border-[#C8F0D8] shadow-sm">
-                            <h3 className="flex items-center gap-3 text-[#3D8A5A] font-bold mb-8 text-[11px] tracking-[3px] uppercase">
+                            <h3 className="flex items-center gap-3 text-primary-600 font-bold mb-8 text-[11px] tracking-[3px] uppercase">
                                 <CheckCircle2 className="w-5 h-5" /> Perfect for You If:
                             </h3>
-                            <ul className="space-y-5 text-sm text-[#6D6C6A] font-bold">
+                            <ul className="space-y-5 text-sm text-text-secondary font-bold">
                                 <li className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-[#3D8A5A] flex-shrink-0" />
+                                    <div className="w-2 h-2 rounded-full bg-primary-600 shrink-0" />
                                     You have multiple cats
                                 </li>
                                 <li className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-[#3D8A5A] flex-shrink-0" />
+                                    <div className="w-2 h-2 rounded-full bg-primary-600 shrink-0" />
                                     You travel for weekends frequently
                                 </li>
                                 <li className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-[#3D8A5A] flex-shrink-0" />
+                                    <div className="w-2 h-2 rounded-full bg-primary-600 shrink-0" />
                                     You have a busy work schedule
                                 </li>
                                 <li className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-[#3D8A5A] flex-shrink-0" />
+                                    <div className="w-2 h-2 rounded-full bg-primary-600 shrink-0" />
                                     You&apos;re sensitive to odors
                                 </li>
                             </ul>
@@ -104,17 +104,17 @@ export const blogPosts: Record<string, BlogPost> = {
                             <h3 className="flex items-center gap-3 text-[#B91C1C] font-bold mb-8 text-[11px] tracking-[3px] uppercase">
                                 <XCircle className="w-5 h-5" /> Maybe Skip If:
                             </h3>
-                            <ul className="space-y-5 text-sm text-[#6D6C6A] font-bold">
+                            <ul className="space-y-5 text-sm text-text-secondary font-bold">
                                 <li className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-[#B91C1C] flex-shrink-0" />
+                                    <div className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
                                     You have a very tight budget
                                 </li>
                                 <li className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-[#B91C1C] flex-shrink-0" />
+                                    <div className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
                                     Your cat is extremely skittish
                                 </li>
                                 <li className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-[#B91C1C] flex-shrink-0" />
+                                    <div className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
                                     You have a tiny studio apartment
                                 </li>
                             </ul>
@@ -136,21 +136,21 @@ export const blogPosts: Record<string, BlogPost> = {
         ],
         content: (
             <div className="space-y-12">
-                <p className="text-lg text-[#6D6C6A] leding-relaxed">If you&apos;re still scooping daily, you&apos;re missing out on a revolution in pet care. It&apos;s not just about laziness—it&apos;s about hygiene.</p>
+                <p className="text-lg text-text-secondary leding-relaxed">If you&apos;re still scooping daily, you&apos;re missing out on a revolution in pet care. It&apos;s not just about laziness—it&apos;s about hygiene.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">1. Superior Odor Control</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">1. Superior Odor Control</h2>
                     <p className="mb-4">Standard boxes let waste sit. Automatic boxes cycle it into a sealed drawer immediately. Carbon filters add another layer of protection.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">2. Health Monitoring</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">2. Health Monitoring</h2>
                     <p className="mb-4">Smart boxes track weight, frequency, and duration. Changes in these metrics can alert you to UTIs or kidney issues before physical symptoms appear.</p>
-                    <div className="bg-[#F0FDF4] p-6 rounded-2xl border border-[#C8F0D8]">
-                        <div className="flex items-center gap-2 font-bold text-[#3D8A5A] mb-2"><Brain className="w-5 h-5" /> Vet Tip</div>
+                    <div className="bg-surface-bg p-6 rounded-2xl border border-[#C8F0D8]">
+                        <div className="flex items-center gap-2 font-bold text-primary-600 mb-2"><Brain className="w-5 h-5" /> Vet Tip</div>
                         <p className="text-sm">"Sudden increase in bathroom trips can indicate a blockage. Smart data saves lives."</p>
                     </div>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">3. Freedom to Travel</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">3. Freedom to Travel</h2>
                     <p>Weekend getaway? No problem. High-capacity drawers can hold up to 2 weeks of waste for a single cat.</p>
                 </section>
             </div>
@@ -168,22 +168,22 @@ export const blogPosts: Record<string, BlogPost> = {
         ],
         content: (
             <div className="space-y-12">
-                <div className="bg-[#F5F4F1] p-8 rounded-3xl border border-[#E5E4E1] flex gap-6 items-start">
-                    <div className="bg-[#3D8A5A] text-white font-bold px-4 py-2 rounded-lg text-sm">VERDICT</div>
+                <div className="bg-surface-bg p-8 rounded-3xl border border-[#E5E4E1] flex gap-6 items-start">
+                    <div className="bg-primary-600 text-white font-bold px-4 py-2 rounded-lg text-sm">VERDICT</div>
                     <div>
                         <h3 className="font-bold text-xl mb-2">Editor&apos;s Choice</h3>
-                        <p className="text-[#6D6C6A]">The undisputed market leader. Flawless reliable cycling, spacious globe, and the best app in the business.</p>
+                        <p className="text-text-secondary">The undisputed market leader. Flawless reliable cycling, spacious globe, and the best app in the business.</p>
                     </div>
                 </div>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Design & Aesthetics</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Design & Aesthetics</h2>
                     <p>Gone is the "cement mixer" look of the LR3. The 4 is sleek, with a wide open opening that invites even large cats comfortably.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Smart Features</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Smart Features</h2>
                     <ul className="grid gap-4 md:grid-cols-2">
-                        <li className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100"><Settings className="w-5 h-5 text-[#3D8A5A]" /> Real-time Waste Level</li>
-                        <li className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100"><Wind className="w-5 h-5 text-[#3D8A5A]" /> OdorTrap™ System</li>
+                        <li className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100"><Settings className="w-5 h-5 text-primary-600" /> Real-time Waste Level</li>
+                        <li className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100"><Wind className="w-5 h-5 text-primary-600" /> OdorTrap™ System</li>
                     </ul>
                 </section>
             </div>
@@ -203,14 +203,14 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">If you hate handling litter entirely, this is the system for you. No scooping, no refilling. Just swap the tray once a month.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">How It Works</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">How It Works</h2>
                     <p>A rake sweeps solid waste into a covered trap. Urine is absorbed by the crystal litter, which dehydrates it to stop odors.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Pros & Cons</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Pros & Cons</h2>
                     <div className="grid md:grid-cols-2 gap-8">
-                        <div className="border border-[#C8F0D8] bg-[#F0FDF4] p-6 rounded-2xl">
-                            <h3 className="text-[#3D8A5A] font-bold mb-4 flex items-center gap-2"><ThumbsUp className="w-5 h-5" /> Pros</h3>
+                        <div className="border border-[#C8F0D8] bg-surface-bg p-6 rounded-2xl">
+                            <h3 className="text-primary-600 font-bold mb-4 flex items-center gap-2"><ThumbsUp className="w-5 h-5" /> Pros</h3>
                             <ul className="space-y-2 text-sm">
                                 <li>• Extremely hygienic</li>
                                 <li>• No dust tracking</li>
@@ -240,15 +240,15 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Not all robots are created equal. Buying the wrong one can lead to a scared cat and a $500 doorstop.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">1. Consider Your Cat&apos;s Size</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">1. Consider Your Cat&apos;s Size</h2>
                     <p>Large breeds like Maine Coons need large globe openings (like the LR4). Smaller entryways (like older barrels) will feel claustrophobic.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">2. Litter Type</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">2. Litter Type</h2>
                     <p>Do you prefer clay clumping? Tofu? Crystal? Most robots require hard-clumping clay. Know before you buy.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">3. Noise Level</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">3. Noise Level</h2>
                     <p>If you live in a studio, noise matters. Look for units rated under 40dB.</p>
                 </section>
             </div>
@@ -265,11 +265,11 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">With 3+ cats, a standard robot fits quickly. You need a workhorse.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Why Capacity Matters</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Why Capacity Matters</h2>
                     <p>A small drawer means emptying it every 2 days. A large drawer (like in the Leo&apos;s Loo Too) can go 5 days with multiple cats.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Cat Recognition</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Cat Recognition</h2>
                     <p>The Whisker App distinguishes cats by weight, so you can track who is using the box. Essential for spotting health issues in a busy home.</p>
                 </section>
             </div>
@@ -286,7 +286,7 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Standard boxes cramp large breeds. The LR4 and Leo&apos;s Loo Too are our top picks for spaciousness.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Globe Size Matters</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Globe Size Matters</h2>
                     <p>A 15-inch opening is the minimum for a 15lb+ cat. Anything smaller and they will likely refuse to enter or leave "prizes" outside.</p>
                 </section>
             </div>
@@ -303,7 +303,7 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Horror stories from 10 years ago don&apos;t apply to modern tech. Today&apos;s sensors are redundant and fail-safe.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Weight & Laser Sensors</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Weight & Laser Sensors</h2>
                     <p>The LR4 uses a "Curtain" of lasers. If a hair breaks the plane, the unit stops instantly. It&apos;s safer than a garage door.</p>
                     <div className="bg-[#FEF2F2] p-6 rounded-2xl border border-[#FECACA]">
                         <div className="flex items-center gap-2 font-bold text-[#B91C1C] mb-2"><ShieldCheck className="w-5 h-5" /> Safety First</div>
@@ -324,13 +324,13 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Tech isn&apos;t perfect. Here&apos;s how to solve the blinking lights on your Litter-Robot or PetKit.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">1. "Bonnet Removed" Error</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">1. "Bonnet Removed" Error</h2>
                     <p>This is usually due to dirty metal contacts. A quick wipe with rubbing alcohol usually solves it instantly.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">2. Cat Won't Enter</h2>
-                    <div className="flex items-start gap-4 bg-[#F5F4F1] p-6 rounded-2xl">
-                        <AlertTriangle className="w-6 h-6 text-[#F59E0B] flex-shrink-0" />
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">2. Cat Won't Enter</h2>
+                    <div className="flex items-start gap-4 bg-surface-bg p-6 rounded-2xl">
+                        <AlertTriangle className="w-6 h-6 text-[#F59E0B] shrink-0" />
                         <p>Stop cleaning the old box! If the old box is dirty, they will seek the clean new robot. It&apos;s tough love, but it works.</p>
                     </div>
                 </section>
@@ -348,7 +348,7 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">The 3 is a workhorse, but the 4 is a luxury car. Here is the breakdown.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Noise Test</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Noise Test</h2>
                     <p>The LR3 hums loudly. The LR4 is silent. If the box is near your bedroom, choose the 4.</p>
                 </section>
             </div>
@@ -365,7 +365,7 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Rotational units (LR4) keep waste cleaner but cost more. Rake units (PetSafe) smear soft stool but are cheap.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">The "Smear" Factor</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">The "Smear" Factor</h2>
                     <p>If your cat has soft stool, do NOT buy a rake system. It will be a nightmare to clean.</p>
                 </section>
             </div>
@@ -382,11 +382,11 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Even self-cleaning boxes need a wash. Do this every 3-6 months.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Step 1: The Disassembly</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Step 1: The Disassembly</h2>
                     <p>Unplug the unit. Remove the bonnet and the globe. Vacuum the base (NEVER use water on the base electronics).</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Step 2: The Globe Soak</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Step 2: The Globe Soak</h2>
                     <p>Take the globe outside. Use an enzyme cleaner and a hose. scrub the liner but be gentle with the mesh screen.</p>
                 </section>
             </div>
@@ -403,11 +403,11 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">You spent $700. Should you spend $100 more?</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">1. The Ramp</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">1. The Ramp</h2>
                     <p>Essential for elderly cats. It reduces the jump height significantly.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">2. OdorTrap Pods</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">2. OdorTrap Pods</h2>
                     <p>Skip them. A cheap box of baking soda near the unit works almost as well.</p>
                 </section>
             </div>
@@ -424,7 +424,7 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">The "Cube" design is modern, but the interior is smaller than the LR4.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Odor Spray</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Odor Spray</h2>
                     <p>The built-in deodorizing spray is a nice touch, but refills are proprietary.</p>
                 </section>
             </div>
@@ -441,7 +441,7 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Most robots are enclosed. The Popur is a bin with a moving liner. It feels like a traditional box.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Two-Box Design</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Two-Box Design</h2>
                     <p>Because the waste bin is separate, the capacity is massive. Great for 3+ cats.</p>
                 </section>
             </div>
@@ -458,8 +458,8 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Short answer: No. They use 12V power.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">The Math</h2>
-                    <div className="bg-[#F5F4F1] p-6 rounded-2xl">
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">The Math</h2>
+                    <div className="bg-surface-bg p-6 rounded-2xl">
                         <p className="font-mono text-sm">Standby: 0.5W<br />Cycling: 3W<br />Monthly Cost: ~$0.15</p>
                     </div>
                     <p className="mt-4">It costs less to run than a nightlight.</p>
@@ -478,11 +478,11 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Behavioral resistance is common. Patience is key.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">The "Treat on the Step" Trick</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">The "Treat on the Step" Trick</h2>
                     <p>Place high-value treats (like Churu) on the step. Don&apos;t force them in. Let them associate the unit with rewards.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Leave It Unplugged</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Leave It Unplugged</h2>
                     <p>For the first week, don&apos;t cycle it automatically. Run it manually only when the cat is in another room.</p>
                 </section>
             </div>
@@ -499,11 +499,11 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Dust kills sensors. You need a low-dust, hard-clumping litter.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Top Pick: Boxiecat Pro</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Top Pick: Boxiecat Pro</h2>
                     <p>It forms flat, rock-hard clumps that don&apos;t stick to the liner. And it has almost zero dust.</p>
                 </section>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Best Budget: Dr. Elsey's Ultra</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Best Budget: Dr. Elsey's Ultra</h2>
                     <p>A classic for a reason. Good clumping, though slightly dustier.</p>
                 </section>
             </div>
@@ -524,7 +524,7 @@ export const blogPosts: Record<string, BlogPost> = {
                 </div>
                 <p className="text-lg mt-6">The risk comes from handling feces. Automatic boxes reduce contact significantly.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Reduced Exposure</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Reduced Exposure</h2>
                     <p>Since you only empty the drawer once a week (and it is sealed), your exposure time is cut by 90%.</p>
                 </section>
             </div>
@@ -541,7 +541,7 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">Remember the LitterMaid from the 90s? It was loud, jammed constantly, and we loved it.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">The Rotational Breakthrough</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">The Rotational Breakthrough</h2>
                     <p>The original Litter-Robot changed everything by using gravity instead of a rake mechanism.</p>
                 </section>
             </div>
@@ -558,7 +558,7 @@ export const blogPosts: Record<string, BlogPost> = {
             <div className="space-y-12">
                 <p className="text-lg">We are just scratching the surface. Future boxes will analyze the waste composition itself.</p>
                 <section>
-                    <h2 className="text-3xl font-bold text-[#1A1918] mb-6">Micro-Analysis</h2>
+                    <h2 className="text-3xl font-bold text-text-primary mb-6">Micro-Analysis</h2>
                     <p>Imagine a box that tells you your cat needs more protein or has a parasite, just by scanning the stool.</p>
                 </section>
             </div>

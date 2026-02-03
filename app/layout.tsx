@@ -50,13 +50,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body className={`${outfit.variable} min-h-screen flex flex-col font-sans antialiased text-[#1A1918] bg-white`}>
+      <body className={`${outfit.variable} min-h-screen flex flex-col font-sans antialiased text-text-primary bg-white`}>
         <Header />
-        <main className="flex-grow">{children}</main>
+        <main className="grow">{children}</main>
         <Footer />
       </body>
     </html>

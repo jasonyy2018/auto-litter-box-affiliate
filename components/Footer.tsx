@@ -23,20 +23,20 @@ const Footer = () => {
     };
 
     return (
-        <footer className="bg-[#1A1918] text-[#9C9B99] pt-[80px] pb-[60px] font-sans">
+        <footer className="bg-text-primary text-text-muted pt-20 pb-[60px] font-sans">
             <div className="max-w-7xl mx-auto px-6 lg:px-20">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[60px] mb-[60px]">
                     {/* Brand */}
                     <div className="col-span-1">
                         <Link href="/" className="flex items-center gap-[10px] mb-8 group">
-                            <div className="w-8 h-8 bg-[#3D8A5A] rounded flex items-center justify-center transition-transform group-hover:scale-105">
+                            <div className="w-8 h-8 bg-primary-600 rounded flex items-center justify-center transition-transform group-hover:scale-105">
                                 <Cat className="w-4 h-4 text-white" />
                             </div>
                             <span className="font-bold text-[22px] text-white tracking-tight">
-                                Auto<span className="text-[#3D8A5A]">Litter</span>
+                                Auto<span className="text-primary-600">Litter</span>
                             </span>
                         </Link>
-                        <p className="text-[14px] leading-relaxed text-[#9C9B99] max-w-[280px]">
+                        <p className="text-[14px] leading-relaxed text-text-muted max-w-[280px]">
                             Empowering cat owners with expert testing and honest reviews to find the perfect self-cleaning litter box.
                         </p>
                     </div>
@@ -64,7 +64,7 @@ const Footer = () => {
                 </div>
 
                 {/* Divider */}
-                <div className="h-[1px] bg-[#333333] w-full mb-10" />
+                <div className="h-px bg-[#333333] w-full mb-10" />
 
                 {/* Bottom */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">

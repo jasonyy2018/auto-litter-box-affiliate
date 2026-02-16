@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { Star, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Product } from '@/lib/products';
 import BuyButton from './BuyButton';
+import PinterestSaveButton from './PinterestSaveButton';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://autolitterboxpro.com';
 
 interface ProductCardProps {
   product: Product;
@@ -35,7 +38,14 @@ export default function ProductCard({ product, rank, variant = 'vertical' }: Pro
         )}
 
         {/* Left: Image */}
-        <div className="md:w-[400px] bg-[#F5F4F1] p-12 flex items-center justify-center relative overflow-hidden flex-shrink-0">
+        <div className="md:w-[400px] bg-surface-bg p-12 flex items-center justify-center relative overflow-hidden shrink-0">
+          <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+            <PinterestSaveButton
+              url={`${SITE_URL}/reviews/${product.slug}`}
+              imageUrl={product.image}
+              description={`${product.name} - ${product.tagline} | $${product.price}`}
+            />
+          </div>
           <img
             src={product.image}
             alt={product.name}
@@ -51,27 +61,27 @@ export default function ProductCard({ product, rank, variant = 'vertical' }: Pro
                 <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-current' : 'text-gray-200'}`} />
               ))}
             </div>
-            <span className="text-sm font-semibold text-[#1A1918]">{product.rating}</span>
-            <span className="text-sm text-[#9C9B99] font-medium">({product.reviewCount} reviews)</span>
+            <span className="text-sm font-semibold text-text-primary">{product.rating}</span>
+            <span className="text-sm text-text-muted font-medium">({product.reviewCount} reviews)</span>
           </div>
 
-          <h3 className="text-[32px] font-bold text-[#1A1918] mb-2 leading-tight">{product.name}</h3>
+          <h3 className="text-[32px] font-bold text-text-primary mb-2 leading-tight">{product.name}</h3>
 
           <div className="flex items-center gap-4 mb-6">
-            <div className="text-[32px] font-bold text-[#3D8A5A]">${product.price}</div>
-            <div className="px-3 py-1 bg-[#C8F0D8] text-[#3D8A5A] text-[10px] font-bold uppercase rounded-md">Save $50</div>
+            <div className="text-[32px] font-bold text-primary-600">${product.price}</div>
+            <div className="px-3 py-1 bg-[#C8F0D8] text-primary-600 text-[10px] font-bold uppercase rounded-md">Save $50</div>
           </div>
 
-          <p className="text-[#6D6C6A] leading-relaxed mb-8 font-medium">
+          <p className="text-text-secondary leading-relaxed mb-8 font-medium">
             {product.description}
           </p>
 
           <div className="mb-10">
-            <div className="text-[16px] font-bold text-[#1A1918] mb-4">Why We Love It</div>
+            <div className="text-[16px] font-bold text-text-primary mb-4">Why We Love It</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
               {product.features.slice(0, 4).map((feature, i) => (
-                <div key={i} className="flex items-start gap-3 text-sm text-[#6D6C6A] font-semibold">
-                  <CheckCircle2 className="w-5 h-5 text-[#3D8A5A] mt-0 flex-shrink-0" />
+                <div key={i} className="flex items-start gap-3 text-sm text-text-secondary font-semibold">
+                  <CheckCircle2 className="w-5 h-5 text-primary-600 mt-0 shrink-0" />
                   <span>{feature}</span>
                 </div>
               ))}
@@ -80,7 +90,7 @@ export default function ProductCard({ product, rank, variant = 'vertical' }: Pro
 
           <div className="mt-auto flex flex-wrap gap-4">
             <BuyButton productSlug={product.slug} productName={product.name} className="px-[32px] py-[16px] font-bold rounded-[12px]" />
-            <Link href={`/reviews/${product.slug}`} className="px-[32px] py-[16px] bg-white border border-[#D1D0CD] text-[#1A1918] font-bold rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 group/link">
+            <Link href={`/reviews/${product.slug}`} className="px-[32px] py-[16px] bg-white border border-[#D1D0CD] text-text-primary font-bold rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 group/link">
               View Full Review <ChevronRight className="w-5 h-5 group-hover/link:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -98,7 +108,14 @@ export default function ProductCard({ product, rank, variant = 'vertical' }: Pro
       )}
 
       {/* Image Container */}
-      <div className="relative h-[320px] bg-[#F5F4F1] p-12 flex items-center justify-center overflow-hidden">
+      <div className="relative h-[320px] bg-surface-bg p-12 flex items-center justify-center overflow-hidden">
+        <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <PinterestSaveButton
+            url={`${SITE_URL}/reviews/${product.slug}`}
+            imageUrl={product.image}
+            description={`${product.name} - ${product.tagline} | $${product.price}`}
+          />
+        </div>
         <img
           src={product.image}
           alt={product.name}
@@ -107,25 +124,25 @@ export default function ProductCard({ product, rank, variant = 'vertical' }: Pro
       </div>
 
       {/* Content */}
-      <div className="p-10 flex flex-col flex-grow">
+      <div className="p-10 flex flex-col grow">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="flex text-yellow-400 mb-2">
             {[...Array(5)].map((_, i) => (
               <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-current' : 'text-gray-200'}`} />
             ))}
           </div>
-          <h3 className="text-2xl font-bold text-[#1A1918] mb-1">{product.name}</h3>
-          <div className="text-xl font-bold text-[#3D8A5A]">${product.price}</div>
+          <h3 className="text-2xl font-bold text-text-primary mb-1">{product.name}</h3>
+          <div className="text-xl font-bold text-primary-600">${product.price}</div>
         </div>
 
-        <p className="text-[#6D6C6A] text-[15px] text-center leading-relaxed mb-8 font-medium">
+        <p className="text-text-secondary text-[15px] text-center leading-relaxed mb-8 font-medium">
           {product.tagline}
         </p>
 
         <div className="space-y-4 mb-10">
           {product.features.slice(0, 3).map((feature, index) => (
-            <div key={index} className="flex items-start gap-3 text-[15px] text-[#6D6C6A] font-medium">
-              <CheckCircle2 className="w-4 h-4 text-[#3D8A5A] mt-0.5 flex-shrink-0" />
+            <div key={index} className="flex items-start gap-3 text-[15px] text-text-secondary font-medium">
+              <CheckCircle2 className="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />
               <span>{feature}</span>
             </div>
           ))}

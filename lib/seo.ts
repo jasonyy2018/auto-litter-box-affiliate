@@ -195,3 +195,50 @@ export function generateBreadcrumbSchema(
     })),
   };
 }
+
+// ─── Pinterest Rich Pin Meta Tags ────────────────────────────────────────
+
+/**
+ * Generate Pinterest-optimized product meta tags (Rich Pins)
+ * Include these in the page's metadata.other field
+ */
+export function generatePinterestProductMeta(product: {
+  name: string;
+  price: number;
+  currency?: string;
+  availability?: string;
+  description: string;
+  image: string;
+  url: string;
+}) {
+  return {
+    'og:type': 'product',
+    'product:price:amount': String(product.price),
+    'product:price:currency': product.currency || 'USD',
+    'product:availability': product.availability || 'instock',
+    'pin:media': product.image,
+    'pin:description': product.description,
+    'pin:url': product.url,
+  };
+}
+
+/**
+ * Generate Pinterest-optimized article meta tags (Rich Pins)
+ * Include these in the page's metadata.other field
+ */
+export function generatePinterestArticleMeta(article: {
+  title: string;
+  description: string;
+  author: string;
+  datePublished: string;
+  dateModified?: string;
+  image: string;
+}) {
+  return {
+    'article:author': article.author,
+    'article:published_time': article.datePublished,
+    'article:modified_time': article.dateModified || article.datePublished,
+    'pin:media': article.image,
+    'pin:description': article.description,
+  };
+}

@@ -2,14 +2,17 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Cat, Menu, X } from 'lucide-react';
+import { Cat, Menu, X, ShoppingBag } from 'lucide-react';
+import { useCart } from '@/lib/CartContext';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { itemCount, toggleCart } = useCart();
 
     const navItems = [
         { label: 'Top Picks', href: '/best' },
         { label: 'Compare', href: '/compare' },
+        { label: 'Shop', href: '/shop' },
         { label: 'Guides', href: '/guides/how-to-choose' },
         { label: 'Blog', href: '/blog' },
     ];
@@ -41,18 +44,42 @@ const Header = () => {
                         ))}
                     </div>
 
-                    {/* CTA */}
-                    <div className="hidden lg:block">
+                    {/* Cart & CTA */}
+                    <div className="hidden lg:flex items-center gap-4">
+                        <button
+                            onClick={toggleCart}
+                            className="relative p-2.5 text-text-secondary hover:text-primary-600 transition-colors"
+                            aria-label="Shopping cart"
+                        >
+                            <ShoppingBag className="w-6 h-6" />
+                            {itemCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce-in">
+                                    {itemCount > 99 ? '99+' : itemCount}
+                                </span>
+                            )}
+                        </button>
                         <Link
-                            href="https://www.litter-robot.com"
+                            href="/shop"
                             className="inline-flex items-center justify-center px-[24px] py-[12px] text-[15px] font-bold rounded-[12px] text-white bg-primary-600 hover:bg-[#2D6A44] transition-all shadow-md hover:shadow-lg active:scale-95"
                         >
-                            Shop Litter-Robot
+                            Visit Shop
                         </Link>
                     </div>
 
-                    {/* Mobile Menu Button */}
-                    <div className="lg:hidden">
+                    {/* Mobile: Cart + Menu */}
+                    <div className="lg:hidden flex items-center gap-2">
+                        <button
+                            onClick={toggleCart}
+                            className="relative p-2 text-text-secondary hover:text-primary-600 transition-colors"
+                            aria-label="Shopping cart"
+                        >
+                            <ShoppingBag className="w-5 h-5" />
+                            {itemCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                                    {itemCount > 99 ? '99+' : itemCount}
+                                </span>
+                            )}
+                        </button>
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="p-2 text-text-secondary hover:text-primary-600 transition-colors"
@@ -78,10 +105,11 @@ const Header = () => {
                                 </Link>
                             ))}
                             <Link
-                                href="https://www.litter-robot.com"
+                                href="/shop"
+                                onClick={() => setIsMenuOpen(false)}
                                 className="mt-4 inline-flex items-center justify-center px-6 py-4 text-base font-bold rounded-xl text-white bg-primary-600 active:scale-95 transition-transform"
                             >
-                                Shop Litter-Robot
+                                Visit Shop
                             </Link>
                         </div>
                     </div>

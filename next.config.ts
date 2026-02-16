@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'm.media-amazon.com' },
+      { protocol: 'https', hostname: 'cbu01.alicdn.com' },
+      { protocol: 'https', hostname: 'img.cjdropshipping.com' },
+      { protocol: 'https', hostname: 'cf.cjdropshipping.com' },
+      { protocol: 'https', hostname: '*.alicdn.com' },
     ],
   },
 };

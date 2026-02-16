@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
-import Link from 'next/link';
-import { Menu, X, Search, ChevronDown, Zap } from 'lucide-react';
 import '@/styles/globals.css';
 import { Header, Footer } from '@/components';
+import CartDrawer from '@/components/CartDrawer';
+import { CartProvider } from '@/lib/CartContext';
 import { siteConfig } from '@/lib/seo';
 
 const outfit = Outfit({
@@ -70,11 +70,31 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Pinterest Tag (Conversion Tracking) */}
+        {process.env.NEXT_PUBLIC_PINTEREST_TAG_ID && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                !function(e){if(!window.pintrk){window.pintrk=function(){
+                window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
+                n=window.pintrk;n.queue=[],n.version="3.0";var
+                t=document.createElement("script");t.async=!0,t.src=e;var
+                r=document.getElementsByTagName("script")[0];
+                r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
+                pintrk('load', '${process.env.NEXT_PUBLIC_PINTEREST_TAG_ID}');
+                pintrk('page');
+              `,
+            }}
+          />
+        )}
       </head>
       <body className={`${outfit.variable} min-h-screen flex flex-col font-sans antialiased text-text-primary bg-white`} suppressHydrationWarning>
-        <Header />
-        <main className="grow">{children}</main>
-        <Footer />
+        <CartProvider>
+          <Header />
+          <main className="grow">{children}</main>
+          <Footer />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );

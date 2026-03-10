@@ -29,7 +29,7 @@ const popularComparisons = [
 ];
 
 export default function ComparePage() {
-  const products = getAllProducts();
+  const products = getAllProducts().slice(0, 6);
 
   return (
     <div className="bg-[#F5F4F1] min-h-screen font-sans">

@@ -2,7 +2,7 @@
 
 export const affiliateConfig = {
   amazon: {
-    tag: 'autolitterbox-20',
+    tag: 'jyu0e-20',
     baseUrl: 'https://www.amazon.com/dp/',
   },
   tracking: {
@@ -25,11 +25,11 @@ export interface AffiliateLink {
 export function generateAmazonLink(asin: string, campaignName?: string): string {
   const { tag, baseUrl } = affiliateConfig.amazon;
   let url = `${baseUrl}${asin}?tag=${tag}`;
-  
+
   if (campaignName) {
     url += `&linkCode=ll1&camp=1789&creative=9325&ascsubtag=${campaignName}`;
   }
-  
+
   return url;
 }
 
@@ -39,7 +39,7 @@ export function generateAmazonLink(asin: string, campaignName?: string): string 
 export function addUtmParams(url: string, campaign: string): string {
   const { utmSource, utmMedium } = affiliateConfig.tracking;
   const separator = url.includes('?') ? '&' : '?';
-  
+
   return `${url}${separator}utm_source=${utmSource}&utm_medium=${utmMedium}&utm_campaign=${campaign}`;
 }
 
@@ -57,7 +57,7 @@ export function trackAffiliateClick(link: AffiliateLink): void {
         product_id: link.productId,
       });
     }
-    
+
     // Console log for development
     console.log('Affiliate click tracked:', {
       product: link.productName,
@@ -107,7 +107,7 @@ export function getAffiliateLink(
 ): string | undefined {
   const links = productAffiliateLinks[productSlug];
   if (!links) return undefined;
-  
+
   return links[preferredPlatform] || links.amazon || links.direct;
 }
 

@@ -39,7 +39,7 @@ const faqs = [
 ];
 
 export default function HomePage() {
-  const products = getAllProducts().slice(0, 3);
+  const products = getAllProducts().slice(0, 12);
 
   return (
     <div className="bg-surface-bg">

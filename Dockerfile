@@ -36,6 +36,7 @@ ENV NODE_ENV=production
 # Copy necessary files from builder
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/prisma ./prisma
 
 # Expose the production port
 EXPOSE 3000

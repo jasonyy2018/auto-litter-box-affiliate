@@ -12,18 +12,18 @@ datasource db {
 // ----------------------------------------------------------------------------
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -45,14 +45,14 @@ model User {
   emailVerified DateTime?
   image         String?
   role          Role      @default(USER) // Admin vs User
-  
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
-  cart          Cart?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  accounts Account[]
+  sessions Session[]
+  orders   Order[]
+  cart     Cart?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -77,55 +77,55 @@ model Category {
   name        String    @unique
   description String?
   products    Product[]
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Product {
-  id               String       @id @default(cuid())
-  cjPid            String?      @unique // Original CJ Dropshipping ID
-  slug             String       @unique
+  id               String   @id @default(cuid())
+  cjPid            String?  @unique // Original CJ Dropshipping ID
+  slug             String   @unique
   name             String
-  description      String       @db.Text
+  description      String   @db.Text
   shortDescription String?
   images           String[]
   price            Float
   costPrice        Float
   originalPrice    Float?
-  currency         String       @default("USD")
+  currency         String   @default("USD")
   weight           Float?
-  sku              String       @unique
-  inStock          Boolean      @default(true)
-  visible          Boolean      @default(true)
-  featured         Boolean      @default(false)
+  sku              String   @unique
+  inStock          Boolean  @default(true)
+  visible          Boolean  @default(true)
+  featured         Boolean  @default(false)
   tags             String[]
 
-  categoryId       String?
-  category         Category?    @relation(fields: [categoryId], references: [id])
-  
-  variants         Variant[]
-  orderItems       OrderItem[]
-  cartItems        CartItem[]
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
 
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  variants   Variant[]
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Variant {
-  id          String      @id @default(cuid())
-  productId   String
-  name        String
-  sku         String      @unique
-  price       Float
-  costPrice   Float
-  image       String?
-  properties  String?     // e.g., "Color: Red, Size: L"
-  inStock     Boolean     @default(true)
+  id         String  @id @default(cuid())
+  productId  String
+  name       String
+  sku        String  @unique
+  price      Float
+  costPrice  Float
+  image      String?
+  properties String? // e.g., "Color: Red, Size: L"
+  inStock    Boolean @default(true)
 
-  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  cartItems   CartItem[]
-  orderItems  OrderItem[]
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 }
 
 // ----------------------------------------------------------------------------
@@ -133,27 +133,27 @@ model Variant {
 // ----------------------------------------------------------------------------
 
 model Cart {
-  id        String     @id @default(cuid())
-  userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     CartItem[]
-  
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id     String     @id @default(cuid())
+  userId String     @unique
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items  CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CartItem {
-  id        String   @id @default(cuid())
-  cartId    String
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
-  
+  product   Product @relation(fields: [productId], references: [id])
+
   variantId String?
   variant   Variant? @relation(fields: [variantId], references: [id])
-  
-  quantity  Int      @default(1)
+
+  quantity Int @default(1)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -166,39 +166,47 @@ model CartItem {
 // ----------------------------------------------------------------------------
 
 model Order {
-  id              String      @id @default(cuid())
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  
-  status          OrderStatus @default(PENDING)
-  totalAmount     Float
-  currency        String      @default("USD")
-  
-  stripeSessionId String?     @unique
-  stripePaymentId String?     @unique
-  
-  shippingAddress Json?       // Store address details flexibly
-  
-  items           OrderItem[]
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  status      OrderStatus @default(PENDING)
+  totalAmount Float
+  currency    String      @default("USD")
+
+  // Stripe fields
+  stripeSessionId String? @unique
+  stripePaymentId String? @unique
+
+  // PayPal fields
+  paypalOrderId   String? @unique
+  paypalPaymentId String? @unique
+
+  // Payment method discriminator
+  paymentMethod String? // "paypal" | "stripe"
+
+  shippingAddress Json? // Store address details flexibly
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model OrderItem {
-  id        String   @id @default(cuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
-  
+  product   Product @relation(fields: [productId], references: [id])
+
   variantId String?
   variant   Variant? @relation(fields: [variantId], references: [id])
-  
-  quantity  Int
-  price     Float    // Price at the time of purchase
-  
+
+  quantity Int
+  price    Float // Price at the time of purchase
+
   createdAt DateTime @default(now())
 }
 
@@ -209,4 +217,23 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+// ----------------------------------------------------------------------------
+// Payment Gateway Configuration (stored encrypted)
+// ----------------------------------------------------------------------------
+
+model PaymentConfig {
+  id           String    @id @default(cuid())
+  provider     String    @unique // "paypal" | "stripe"
+  clientId     String // PayPal Client ID
+  clientSecret String    @db.Text // PayPal Secret (encrypted)
+  mode         String    @default("sandbox") // "sandbox" | "live"
+  isActive     Boolean   @default(false)
+  lastVerified DateTime?
+  merchantId   String? // PayPal Merchant ID (from verification)
+  webhookId    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

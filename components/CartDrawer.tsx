@@ -3,9 +3,11 @@
 import React from 'react';
 import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function CartDrawer() {
+    const router = useRouter();
     const { items, isOpen, closeCart, itemCount, subtotal, updateQuantity, removeFromCart, clearCart } = useCart();
 
     if (!isOpen) return null;
@@ -112,6 +114,10 @@ export default function CartDrawer() {
                         </div>
                         <p className="text-xs text-text-muted">Shipping calculated at checkout</p>
                         <button
+                            onClick={() => {
+                                closeCart();
+                                router.push('/shop/checkout');
+                            }}
                             className="w-full py-4 bg-primary-600 hover:bg-[#2D6A44] text-white font-bold rounded-xl transition-colors shadow-lg"
                         >
                             Checkout

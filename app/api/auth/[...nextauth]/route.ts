@@ -1,5 +1,18 @@
 import NextAuth from 'next-auth';
-import type { NextAuthOptions } from 'next-auth';
+import type { NextAuthOptions, DefaultSession, DefaultUser } from 'next-auth';
+
+declare module 'next-auth' {
+    interface Session {
+        user: {
+            id: string;
+            role: string;
+        } & DefaultSession["user"];
+    }
+
+    interface User extends DefaultUser {
+        role: string;
+    }
+}
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';

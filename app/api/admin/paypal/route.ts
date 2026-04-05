@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { clientId, clientSecret, mode } = body;
+        let { clientId, clientSecret, mode } = body;
 
         if (!clientId || !clientSecret) {
             return NextResponse.json(
@@ -69,6 +69,9 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+
+        clientId = clientId.trim();
+        clientSecret = clientSecret.trim();
 
         if (mode && !['sandbox', 'live'].includes(mode)) {
             return NextResponse.json(

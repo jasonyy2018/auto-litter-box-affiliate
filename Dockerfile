@@ -1,6 +1,7 @@
 FROM node:22-alpine AS builder
 
-# Install pnpm
+# Install dependencies required by Prisma and then add pnpm
+RUN apk add --no-cache openssl
 RUN npm install -g pnpm
 
 WORKDIR /app
@@ -23,7 +24,8 @@ RUN pnpm build
 # ---
 FROM node:22-alpine AS runner
 
-# Install pnpm
+# Install dependencies for runner
+RUN apk add --no-cache openssl
 RUN npm install -g pnpm
 
 WORKDIR /app

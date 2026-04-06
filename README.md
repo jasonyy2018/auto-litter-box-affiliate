@@ -1,6 +1,6 @@
 # AutoLitterBox Pro - Affiliate Website
 
-A modern, SEO-optimized affiliate website for automatic litter box reviews and comparisons built with Next.js 14.
+A modern, SEO-optimized affiliate website for automatic litter box reviews and comparisons built with Next.js 16.
 
 ## Features
 
@@ -13,7 +13,7 @@ A modern, SEO-optimized affiliate website for automatic litter box reviews and c
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Styling**: Tailwind CSS
 - **Content**: MDX with gray-matter
 - **Icons**: Lucide React
@@ -24,32 +24,19 @@ A modern, SEO-optimized affiliate website for automatic litter box reviews and c
 ```
 auto-litter-box-affiliate/
 ├── app/                    # Next.js App Router pages
+│   ├── api/                # Backend API Routes
+│   │   ├── admin/          # OpenClaw & Admin AI control (Blogs, Products, Orders, Social)
+│   │   ├── cj/             # CJ Dropshipping integrations
+│   │   └── pinterest/      # Automated social media posting
 │   ├── layout.tsx          # Root layout with Header/Footer
 │   ├── page.tsx            # Homepage
-│   ├── best/               # Best picks page
-│   ├── compare/            # Comparison pages
-│   ├── reviews/            # Product review pages
-│   ├── guides/             # Buying guides
-│   ├── blog/               # Blog articles
-│   └── deals/              # Deals and coupons
+│   ├── blog/               # SEO & AI Blogs
+│   └── shop/               # Products and Checkout
 ├── components/             # React components
-│   ├── ComparisonTable.tsx # Product comparison table
-│   ├── ProductCard.tsx     # Product display card
-│   ├── ProsCons.tsx        # Pros/Cons lists
-│   ├── Rating.tsx          # Star rating component
-│   ├── BuyButton.tsx       # Affiliate CTA button
-│   ├── FAQ.tsx             # FAQ with schema
-│   └── TOC.tsx             # Table of contents
-├── content/                # MDX content files
-│   ├── products/           # Product review content
-│   ├── compare/            # Comparison articles
-│   ├── guides/             # Guide content
-│   └── blog/               # Blog posts
+├── prisma/                 # Prisma schema for PostgreSQL DB (Users, Blogs, Orders, Config)
 ├── lib/                    # Utility functions
-│   ├── seo.ts              # SEO utilities and schemas
-│   ├── products.ts         # Product data and functions
-│   └── affiliate.ts        # Affiliate link management
 ├── public/                 # Static assets
+│   ├── openclaw/           # OpenClaw LLM agent skills and openapi configs
 │   └── images/             # Product images
 ├── styles/
 │   └── globals.css         # Global styles
@@ -168,8 +155,12 @@ Deploy the `.next` folder to your hosting provider.
 
 ## License
 
-MIT License - See LICENSE file for details.
+**Copyright © 2026 WSAI. All Rights Reserved.**
+
+This project and its source code are proprietary and confidential to WSAI. Unauthorized copying, modification, distribution, or use of this software, via any medium, is strictly prohibited without the express written permission of WSAI. 
+
+See the `LICENSE` file for more details.
 
 ## Support
 
-For questions or issues, please open a GitHub issue.
+For customized authorization or issues, please contact WSAI official channels.

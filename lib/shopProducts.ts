@@ -12,6 +12,8 @@ export interface ShopProduct {
     shortDescription: string;
     category: string;
     images: string[];
+    amazonLink?: string;          // Amazon Affiliate Link
+    affiliateLink?: string;       // Custom Affiliate Link
     price: number;                // Selling price (with markup)
     costPrice: number;            // CJ cost price
     originalPrice?: number;       // Strike-through price

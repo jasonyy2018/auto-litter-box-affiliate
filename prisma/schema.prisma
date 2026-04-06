@@ -239,3 +239,23 @@ model PaymentConfig {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ----------------------------------------------------------------------------
+// Content Management System (Blog)
+// ----------------------------------------------------------------------------
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String   @db.Text
+  readTime    String?  @default("5 min read")
+  author      String?  @default("AI Assistant")
+  content     String   @db.Text // Store raw HTML or Markdown
+  faqs        Json     @default("[]") // Array of {question: string, answer: string} objects
+  published   Boolean  @default(true)
+  
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

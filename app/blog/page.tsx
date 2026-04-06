@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { blogPosts } from '@/lib/blogPosts';
+import { getAllUnifiedBlogs } from '@/lib/blogDb';
 import { ArrowRight, Calendar, Clock, User } from 'lucide-react';
 
 export const metadata = {
@@ -7,8 +7,8 @@ export const metadata = {
     description: 'Latest guides, reviews, and tips for automatic litter box owners.',
 };
 
-export default function BlogIndexPage() {
-    const posts = Object.entries(blogPosts).map(([slug, post]) => ({ slug, ...post }));
+export default async function BlogIndexPage() {
+    const posts = await getAllUnifiedBlogs();
 
     return (
         <div className="bg-surface-bg min-h-screen font-sans">

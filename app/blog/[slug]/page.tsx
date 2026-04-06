@@ -4,15 +4,16 @@ import Link from 'next/link';
 import { User, Clock, ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo';
 
-import { blogPosts } from '@/lib/blogPosts';
+import { getAllUnifiedBlogs, getUnifiedBlogBySlug } from '@/lib/blogDb';
 
 export async function generateStaticParams() {
-   return Object.keys(blogPosts).map((slug) => ({ slug }));
+   const blogs = await getAllUnifiedBlogs();
+   return blogs.map((b) => ({ slug: b.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
    const { slug } = await params;
-   const post = blogPosts[slug];
+   const post = await getUnifiedBlogBySlug(slug);
    if (!post) return {};
 
    return generateSeoMetadata({
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
    const { slug } = await params;
-   const post = blogPosts[slug];
+   const post = await getUnifiedBlogBySlug(slug);
    if (!post) notFound();
 
    return (
@@ -70,8 +71,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
          </section>
 
          <div className="max-w-5xl mx-auto px-8 py-24">
-            <div className="max-w-4xl mx-auto">
-               {post.content}
+            <div className="max-w-4xl mx-auto overflow-hidden markdown-body">
+               {typeof post.content === 'string' ? (
+                   <div dangerouslySetInnerHTML={{ __html: post.content }} />
+               ) : (
+                   post.content
+               )}
             </div>
 
             <section className="mt-32 py-20 bg-primary-600 rounded-[64px] text-center text-white px-8 shadow-2xl relative overflow-hidden">

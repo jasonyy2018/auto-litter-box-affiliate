@@ -32,10 +32,15 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { cjProduct, markup = 1.5 } = body as { cjProduct: CJProduct; markup?: number };
+        const { cjProduct, customProduct, markup = 1.5 } = body;
+
+        if (customProduct) {
+            const newProduct = addShopProduct(customProduct);
+            return NextResponse.json({ success: true, data: newProduct });
+        }
 
         if (!cjProduct || !cjProduct.pid) {
-            return NextResponse.json({ error: 'Invalid CJ product data' }, { status: 400 });
+            return NextResponse.json({ error: 'Invalid CJ product data or custom product data' }, { status: 400 });
         }
 
         const sellingPrice = parseFloat((cjProduct.sellPrice * markup).toFixed(2));
@@ -53,7 +58,7 @@ export async function POST(request: NextRequest) {
             costPrice: cjProduct.sellPrice,
             originalPrice: parseFloat((sellingPrice * 1.2).toFixed(2)),
             currency: 'USD',
-            variants: (cjProduct.variants || []).map(v => ({
+            variants: (cjProduct.variants || []).map((v: any) => ({
                 id: v.vid,
                 name: v.variantNameEn || v.variantName,
                 sku: v.variantSku,

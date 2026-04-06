@@ -2,12 +2,15 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Cat, Menu, X, ShoppingBag } from 'lucide-react';
+import { Cat, Menu, X, ShoppingBag, User } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
+import { useSession, signOut } from 'next-auth/react';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const { itemCount, toggleCart } = useCart();
+    const { data: session } = useSession();
 
     const navItems = [
         { label: 'Top Picks', href: '/best' },
@@ -58,9 +61,44 @@ const Header = () => {
                                 </span>
                             )}
                         </button>
+
+                        {session ? (
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                    className="p-2.5 text-text-secondary hover:text-primary-600 transition-colors flex items-center gap-2"
+                                    aria-label="User menu"
+                                >
+                                    <User className="w-6 h-6" />
+                                    <span className="text-sm font-semibold max-w-[100px] truncate">{session.user?.name || session.user?.email?.split('@')[0]}</span>
+                                </button>
+                                {isUserMenuOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white border border-[#E5E4E1] rounded-xl shadow-lg py-2">
+                                        {session.user?.role === 'ADMIN' && (
+                                            <Link href="/admin/products" className="block px-4 py-2 text-sm text-text-secondary hover:bg-surface-bg hover:text-primary-600" onClick={() => setIsUserMenuOpen(false)}>
+                                                Admin Dashboard
+                                            </Link>
+                                        )}
+                                        <button
+                                            onClick={() => signOut()}
+                                            className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                        >
+                                            Log Out
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <Link
+                                href="/login"
+                                className="inline-flex items-center justify-center px-[24px] py-[10px] text-[15px] font-bold rounded-[12px] text-primary-600 bg-white border-2 border-primary-600 hover:bg-primary-50 transition-all active:scale-95 ml-2"
+                            >
+                                Log In
+                            </Link>
+                        )}
                         <Link
                             href="/shop"
-                            className="inline-flex items-center justify-center px-[24px] py-[12px] text-[15px] font-bold rounded-[12px] text-white bg-primary-600 hover:bg-[#2D6A44] transition-all shadow-md hover:shadow-lg active:scale-95"
+                            className="inline-flex items-center justify-center px-[24px] py-[12px] text-[15px] font-bold rounded-[12px] text-white bg-primary-600 hover:bg-[#2D6A44] transition-all shadow-md hover:shadow-lg active:scale-95 ml-1"
                         >
                             Visit Shop
                         </Link>
@@ -104,6 +142,33 @@ const Header = () => {
                                     {item.label}
                                 </Link>
                             ))}
+                            {session ? (
+                                <>
+                                    {session.user?.role === 'ADMIN' && (
+                                        <Link
+                                            href="/admin/products"
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="text-text-secondary hover:text-primary-600 font-medium text-lg transition-colors flex items-center gap-2"
+                                        >
+                                            <User className="w-5 h-5" /> Admin Dashboard
+                                        </Link>
+                                    )}
+                                    <button
+                                        onClick={() => signOut()}
+                                        className="text-left text-red-600 hover:text-red-700 font-medium text-lg transition-colors"
+                                    >
+                                        Log Out ({session.user?.name || session.user?.email?.split('@')[0]})
+                                    </button>
+                                </>
+                            ) : (
+                                <Link
+                                    href="/login"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="text-text-secondary hover:text-primary-600 font-medium text-lg transition-colors flex items-center gap-2"
+                                >
+                                    <User className="w-5 h-5" /> Log In / Sign Up
+                                </Link>
+                            )}
                             <Link
                                 href="/shop"
                                 onClick={() => setIsMenuOpen(false)}

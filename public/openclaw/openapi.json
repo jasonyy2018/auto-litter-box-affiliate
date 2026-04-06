@@ -1,0 +1,253 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AutoLitterBox Admin API",
+    "description": "API for managing products and payment settings of the AutoLitterBox Affiliate E-commerce platform.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    },
+    {
+      "url": "https://www.autolitterbox.com",
+      "description": "Production server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/admin/products": {
+      "get": {
+        "summary": "List all shop products",
+        "description": "Returns a list of all products in the shop.",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Import a product from CJ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cjProduct": {
+                    "type": "object",
+                    "description": "CJ Product data"
+                  },
+                  "customProduct": {
+                    "type": "object",
+                    "description": "Custom Affiliate Product data (e.g. Amazon)"
+                  },
+                  "markup": {
+                    "type": "number",
+                    "description": "Markup multiplier, default 1.5"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Product imported successfully" }
+        }
+      },
+      "put": {
+        "summary": "Update a shop product",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" }
+                },
+                "required": ["id"],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Product updated successfully" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a shop product",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Product deleted successfully" }
+        }
+      }
+    },
+    "/api/admin/paypal": {
+      "get": {
+        "summary": "Get PayPal configuration",
+        "responses": {
+          "200": {
+            "description": "Returns current PayPal configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Save PayPal credentials",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clientId": { "type": "string" },
+                  "clientSecret": { "type": "string" },
+                  "mode": { "type": "string", "enum": ["sandbox", "live"] }
+                },
+                "required": ["clientId", "clientSecret"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Credentials saved" }
+        }
+      },
+      "delete": {
+        "summary": "Remove PayPal configuration",
+        "responses": {
+          "200": { "description": "Configuration removed" }
+        }
+      }
+    },
+    "/api/admin/blogs": {
+      "get": {
+        "summary": "List all blogs",
+        "responses": {
+          "200": { "description": "Returns blog list" }
+        }
+      },
+      "post": {
+        "summary": "Create a new blog",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "content": { "type": "string" },
+                  "description": { "type": "string" }
+                },
+                "required": ["title", "content"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Blog created" } }
+      },
+      "delete": {
+        "summary": "Delete a blog",
+        "parameters": [
+          { "name": "id", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Blog deleted" } }
+      }
+    },
+    "/api/admin/orders": {
+      "get": {
+        "summary": "List all orders",
+        "responses": { "200": { "description": "Returns orders list" } }
+      },
+      "put": {
+        "summary": "Update order status",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "status": { "type": "string" },
+                  "trackingInfo": { "type": "object" }
+                },
+                "required": ["id", "status"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Order updated" } }
+      }
+    },
+    "/api/admin/social/publish": {
+      "post": {
+        "summary": "Publish or draft social media content",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "platform": { "type": "string", "enum": ["pinterest", "tiktok", "instagram"] },
+                  "mediaUrl": { "type": "string" },
+                  "text": { "type": "string" },
+                  "type": { "type": "string" },
+                  "id": { "type": "string" }
+                },
+                "required": ["platform"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Publish result" } }
+      }
+    }
+  }
+}

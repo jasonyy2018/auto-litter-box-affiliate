@@ -3,6 +3,13 @@
 
 const CJ_BASE_URL = 'https://developers.cjdropshipping.com/api2.0/v1';
 
+import dns from 'node:dns';
+try {
+    dns.setDefaultResultOrder('ipv4first');
+} catch (e) {
+    // Ignore in edge environments
+}
+
 // Token cache
 let cachedToken: { accessToken: string; expiry: number } | null = null;
 

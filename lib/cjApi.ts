@@ -4,6 +4,8 @@
 const CJ_BASE_URL = 'https://developers.cjdropshipping.com/api2.0/v1';
 
 import dns from 'node:dns';
+import https from 'node:https';
+
 try {
     dns.setDefaultResultOrder('ipv4first');
 } catch (e) {
@@ -12,6 +14,51 @@ try {
 
 // Token cache
 let cachedToken: { accessToken: string; expiry: number } | null = null;
+
+// Native HTTPS wrapper to bypass NextJS undici connection pool bugs
+function httpsFetch(url: string, options: any = {}): Promise<any> {
+    return new Promise((resolve, reject) => {
+        const urlObj = new URL(url);
+        const reqOptions = {
+            hostname: urlObj.hostname,
+            path: urlObj.pathname + urlObj.search,
+            method: options.method || 'GET',
+            headers: options.headers || {},
+        };
+
+        const req = https.request(reqOptions, (res) => {
+            let body = '';
+            res.on('data', (chunk) => body += chunk);
+            res.on('end', () => {
+                const response = {
+                    ok: res.statusCode !== undefined && res.statusCode >= 200 && res.statusCode < 300,
+                    status: res.statusCode,
+                    statusText: res.statusMessage,
+                    json: async () => {
+                        try {
+                            return JSON.parse(body);
+                        } catch (err) {
+                            console.error('CJ JSON parse error:', body.substring(0, 200));
+                            throw err;
+                        }
+                    }
+                };
+                resolve(response);
+            });
+        });
+
+        req.on('error', reject);
+        req.setTimeout(60000, () => { // 60s timeout for slow GFW connections
+             req.destroy();
+             reject(new Error('CJ API Proxy/Timeout Error'));
+        });
+
+        if (options.body) {
+            req.write(options.body);
+        }
+        req.end();
+    });
+}
 
 export interface CJProduct {
     pid: string;
@@ -93,7 +140,7 @@ export async function getAccessToken(): Promise<string> {
         throw new Error('CJ_API_KEY environment variable is not set');
     }
 
-    const response = await fetch(`${CJ_BASE_URL}/authentication/getAccessToken`, {
+    const response = await httpsFetch(`${CJ_BASE_URL}/authentication/getAccessToken`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -147,7 +194,7 @@ export async function searchProducts(
     if (options?.startSellPrice !== undefined) params.set('startSellPrice', options.startSellPrice.toString());
     if (options?.endSellPrice !== undefined) params.set('endSellPrice', options.endSellPrice.toString());
 
-    const response = await fetch(`${CJ_BASE_URL}/product/listV2?${params.toString()}`, {
+    const response = await httpsFetch(`${CJ_BASE_URL}/product/listV2?${params.toString()}`, {
         method: 'GET',
         headers: {
             'CJ-Access-Token': token,
@@ -159,13 +206,70 @@ export async function searchProducts(
         throw new Error(`CJ Search failed: ${response.status} ${response.statusText}`);
     }
 
-    const data: CJApiResponse<CJSearchResult> = await response.json();
+    const data: CJApiResponse<any> = await response.json();
 
     if (!data.result) {
         throw new Error(`CJ Search error: ${data.message}`);
     }
 
-    return data.data;
+    // CJ API v2 listV2 response format varies:
+    // - May return { content: [{ productList: [...] }], totalRecords, pageNumber }
+    // - Or { list: [...], total, pageNum }
+    // Normalize to our CJSearchResult format: { list, total, pageNum, pageSize }
+    const raw = data.data;
+    const normalized: CJSearchResult = {
+        pageNum: raw.pageNumber ?? raw.pageNum ?? 1,
+        pageSize: raw.pageSize ?? size,
+        total: raw.totalRecords ?? raw.total ?? 0,
+        list: [],
+    };
+
+    // Extract products from whichever format CJ returns
+    let rawProducts: any[] = [];
+    if (raw.list && Array.isArray(raw.list)) {
+        rawProducts = raw.list;
+    } else if (raw.content) {
+        if (Array.isArray(raw.content) && raw.content.length > 0 && raw.content[0].productList) {
+            rawProducts = raw.content[0].productList;
+        } else if (raw.content.productList) {
+            rawProducts = raw.content.productList;
+        }
+    }
+
+    // Map CJ v2 field names to our CJProduct interface
+    normalized.list = rawProducts.map((p: any) => ({
+        pid: p.pid || p.id || '',
+        productName: p.productName || p.nameEn || p.name || '',
+        productNameEn: p.productNameEn || p.nameEn || p.name || '',
+        productSku: p.productSku || p.sku || '',
+        productImage: p.productImage || p.bigImage || '',
+        productWeight: p.productWeight ?? p.weight ?? 0,
+        productType: p.productType ?? 0,
+        productUnit: p.productUnit || '',
+        sellPrice: typeof p.sellPrice === 'string' ? parseFloat(p.sellPrice) : (p.sellPrice ?? 0),
+        categoryId: p.categoryId || '',
+        categoryName: p.categoryName || p.threeCategoryName || p.oneCategoryName || '',
+        sourceFrom: p.sourceFrom ?? 0,
+        remark: p.remark || '',
+        createrTime: p.createrTime || p.createAt || '',
+        productImageSet: p.productImageSet || (p.bigImage ? [p.bigImage] : []),
+        variants: p.variants || [],
+        description: p.description || '',
+        packingWeight: p.packingWeight ?? 0,
+        packingLength: p.packingLength ?? 0,
+        packingWidth: p.packingWidth ?? 0,
+        packingHeight: p.packingHeight ?? 0,
+        entryCode: p.entryCode || '',
+        entryNameEn: p.entryNameEn || '',
+        materialNameEn: p.materialNameEn || '',
+        materialKey: p.materialKey || '',
+        packingKey: p.packingKey || '',
+        productKey: p.productKey || '',
+        productBrief: p.productBrief || p.description || '',
+        supplierName: p.supplierName || '',
+    }));
+
+    return normalized;
 }
 
 /**
@@ -174,7 +278,7 @@ export async function searchProducts(
 export async function getProductDetail(pid: string): Promise<CJProduct> {
     const token = await getAccessToken();
 
-    const response = await fetch(`${CJ_BASE_URL}/product/query?pid=${pid}`, {
+    const response = await httpsFetch(`${CJ_BASE_URL}/product/query?pid=${pid}`, {
         method: 'GET',
         headers: {
             'CJ-Access-Token': token,
@@ -201,7 +305,7 @@ export async function getProductDetail(pid: string): Promise<CJProduct> {
 export async function getCategories(): Promise<unknown[]> {
     const token = await getAccessToken();
 
-    const response = await fetch(`${CJ_BASE_URL}/product/getCategory`, {
+    const response = await httpsFetch(`${CJ_BASE_URL}/product/getCategory`, {
         method: 'GET',
         headers: {
             'CJ-Access-Token': token,

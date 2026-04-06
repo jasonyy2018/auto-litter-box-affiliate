@@ -172,8 +172,34 @@ export default function AdminProductsPage() {
                                                     )}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-bold text-text-primary truncate max-w-[250px]">{product.name}</p>
-                                                    <p className="text-xs text-text-muted">SKU: {product.sku}</p>
+                                                    {(() => {
+                                                        const link = product.amazonLink || product.affiliateLink || (product.cjPid && product.cjPid.length > 5 ? `https://cjdropshipping.com/product/${product.cjPid.toLowerCase()}.html` : null);
+                                                        return link ? (
+                                                            <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-text-primary hover:text-primary-600 hover:underline truncate max-w-[250px] block transition-colors">
+                                                                {product.name}
+                                                            </a>
+                                                        ) : (
+                                                            <p className="text-sm font-bold text-text-primary truncate max-w-[250px]">{product.name}</p>
+                                                        );
+                                                    })()}
+                                                    <p className="text-xs text-text-muted mb-1.5 mt-0.5">SKU: {product.sku}</p>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {product.cjPid && product.cjPid.length > 5 && (
+                                                            <a href={`https://cjdropshipping.com/product/${product.cjPid.toLowerCase()}.html`} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                                                CJ Source
+                                                            </a>
+                                                        )}
+                                                        {product.amazonLink && (
+                                                            <a href={product.amazonLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded border border-orange-100 hover:bg-orange-100 transition-colors">
+                                                                Amazon
+                                                            </a>
+                                                        )}
+                                                        {product.affiliateLink && (
+                                                            <a href={product.affiliateLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 hover:bg-purple-100 transition-colors">
+                                                                Affiliate
+                                                            </a>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
@@ -469,6 +495,8 @@ function EditModal({ product, onClose, onSave }: {
     const [visible, setVisible] = useState(product.visible);
     const [featured, setFeatured] = useState(product.featured);
     const [tags, setTags] = useState(product.tags.join(', '));
+    const [amazonLink, setAmazonLink] = useState(product.amazonLink || '');
+    const [affiliateLink, setAffiliateLink] = useState(product.affiliateLink || '');
 
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-80 flex items-center justify-center p-6" onClick={onClose}>
@@ -546,6 +574,29 @@ function EditModal({ product, onClose, onSave }: {
                         />
                     </div>
 
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Amazon Proxy Link</label>
+                            <input
+                                type="url"
+                                value={amazonLink}
+                                onChange={(e) => setAmazonLink(e.target.value)}
+                                placeholder="https://amazon.com/dp/..."
+                                className="w-full px-4 py-3 bg-surface-bg rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-600/20"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Custom Affiliate Link</label>
+                            <input
+                                type="url"
+                                value={affiliateLink}
+                                onChange={(e) => setAffiliateLink(e.target.value)}
+                                placeholder="https://shareasale.com/r..."
+                                className="w-full px-4 py-3 bg-surface-bg rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-600/20"
+                            />
+                        </div>
+                    </div>
+
                     <div>
                         <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Tags (comma-separated)</label>
                         <input
@@ -598,6 +649,8 @@ function EditModal({ product, onClose, onSave }: {
                             category,
                             visible,
                             featured,
+                            amazonLink: amazonLink || undefined,
+                            affiliateLink: affiliateLink || undefined,
                             tags: tags.split(',').map(t => t.trim()).filter(Boolean),
                         })}
                         className="flex-1 py-3 bg-primary-600 hover:bg-[#2D6A44] text-white font-bold rounded-xl transition-colors shadow-lg"

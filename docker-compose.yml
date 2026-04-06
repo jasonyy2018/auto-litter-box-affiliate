@@ -9,6 +9,8 @@ services:
       - DATABASE_URL=postgresql://postgres:password123@db:5432/autolitter?schema=public
     depends_on:
       - db
+    volumes:
+      - /root/dockerdata/alitter/public:/app/public
 
   db:
     image: postgres:15-alpine

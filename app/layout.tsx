@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Outfit } from 'next/font/google';
 import '@/styles/globals.css';
-import { Header, Footer } from '@/components';
+import { Header, Footer, LayoutWrapper } from '@/components';
 import AuthProvider from '@/components/AuthProvider';
 import CartDrawer from '@/components/CartDrawer';
 import { CartProvider } from '@/lib/CartContext';
@@ -92,10 +92,9 @@ export default function RootLayout({
       <body className={`${outfit.variable} min-h-screen flex flex-col font-sans antialiased text-text-primary bg-white`} suppressHydrationWarning>
         <AuthProvider>
           <CartProvider>
-            <Header />
-            <main className="grow">{children}</main>
-            <Footer />
-            <CartDrawer />
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
           </CartProvider>
         </AuthProvider>
       </body>

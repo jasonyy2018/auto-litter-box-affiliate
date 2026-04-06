@@ -74,6 +74,9 @@ const Header = () => {
                                 </button>
                                 {isUserMenuOpen && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white border border-[#E5E4E1] rounded-xl shadow-lg py-2">
+                                        <Link href="/dashboard" className="block px-4 py-2 text-sm text-text-secondary hover:bg-surface-bg hover:text-primary-600" onClick={() => setIsUserMenuOpen(false)}>
+                                            My Dashboard
+                                        </Link>
                                         {session.user?.role === 'ADMIN' && (
                                             <Link href="/admin/products" className="block px-4 py-2 text-sm text-text-secondary hover:bg-surface-bg hover:text-primary-600" onClick={() => setIsUserMenuOpen(false)}>
                                                 Admin Dashboard
@@ -144,6 +147,13 @@ const Header = () => {
                             ))}
                             {session ? (
                                 <>
+                                    <Link
+                                        href="/dashboard"
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-text-secondary hover:text-primary-600 font-medium text-lg transition-colors flex items-center gap-2"
+                                    >
+                                        <User className="w-5 h-5" /> My Dashboard
+                                    </Link>
                                     {session.user?.role === 'ADMIN' && (
                                         <Link
                                             href="/admin/products"

@@ -183,28 +183,42 @@ export default function ShopProductDetailPage() {
 
                         {/* Quantity & Add to Cart */}
                         <div className="flex items-center gap-4 mb-8">
-                            <div className="flex items-center gap-1 bg-surface-bg rounded-xl border border-[#E5E4E1]">
-                                <button
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="w-12 h-12 flex items-center justify-center hover:bg-gray-200 rounded-l-xl transition-colors"
+                            {!product.amazonLink && !product.affiliateLink && (
+                                <div className="flex items-center gap-1 bg-surface-bg rounded-xl border border-[#E5E4E1]">
+                                    <button
+                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        className="w-12 h-12 flex items-center justify-center hover:bg-gray-200 rounded-l-xl transition-colors"
+                                    >
+                                        <Minus className="w-4 h-4" />
+                                    </button>
+                                    <span className="w-12 text-center font-bold text-lg">{quantity}</span>
+                                    <button
+                                        onClick={() => setQuantity(quantity + 1)}
+                                        className="w-12 h-12 flex items-center justify-center hover:bg-gray-200 rounded-r-xl transition-colors"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
+                            {product.amazonLink || product.affiliateLink ? (
+                                <a
+                                    href={product.amazonLink || product.affiliateLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer sponsored"
+                                    className="flex-1 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-3"
                                 >
-                                    <Minus className="w-4 h-4" />
-                                </button>
-                                <span className="w-12 text-center font-bold text-lg">{quantity}</span>
+                                    <ShoppingCart className="w-5 h-5" />
+                                    {product.amazonLink ? 'Buy on Amazon' : 'Buy Direct'} — ${(displayPrice * quantity).toFixed(2)}
+                                </a>
+                            ) : (
                                 <button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    className="w-12 h-12 flex items-center justify-center hover:bg-gray-200 rounded-r-xl transition-colors"
+                                    onClick={handleAddToCart}
+                                    className="flex-1 py-4 bg-primary-600 hover:bg-[#2D6A44] text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-3"
                                 >
-                                    <Plus className="w-4 h-4" />
+                                    <ShoppingCart className="w-5 h-5" />
+                                    Add to Cart — ${(displayPrice * quantity).toFixed(2)}
                                 </button>
-                            </div>
-                            <button
-                                onClick={handleAddToCart}
-                                className="flex-1 py-4 bg-primary-600 hover:bg-[#2D6A44] text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-3"
-                            >
-                                <ShoppingCart className="w-5 h-5" />
-                                Add to Cart — ${(displayPrice * quantity).toFixed(2)}
-                            </button>
+                            )}
                         </div>
 
                         {/* Trust Badges */}

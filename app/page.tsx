@@ -92,9 +92,12 @@ export default function HomePage() {
           {/* Right Image */}
           <div className="relative animate-fade-in-up delay-400">
             <div className="relative aspect-4/3 rounded-[40px] overflow-hidden shadow-2xl border-8 border-white">
-              <img
-                src="https://images.unsplash.com/photo-1592194996308-7b43878e84a6?q=80&w=1200&auto=format&fit=crop"
-                alt="Cat with automatic litter box"
+              <video
+                src="/videos/smart-litter-box-demo.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
                 className="w-full h-full object-cover"
               />
             </div>

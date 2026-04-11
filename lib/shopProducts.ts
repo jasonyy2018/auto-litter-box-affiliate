@@ -27,6 +27,11 @@ export interface ShopProduct {
     tags: string[];
     createdAt: string;
     updatedAt: string;
+    // CJ Sync Status Fields
+    cjStatus?: 'active' | 'discontinued' | 'unknown'; // CJ product availability status
+    discontinuedAt?: string;      // When the product was discontinued
+    discontinuedReason?: string;  // Reason for discontinuation
+    lastSyncedAt?: string;        // Last time synced with CJ API
 }
 
 export interface ShopVariant {

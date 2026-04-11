@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import {
     Search, Plus, Pencil, Trash2, Eye, EyeOff, X, Download,
-    ChevronLeft, ChevronRight, Star, Loader2, Check
+    ChevronLeft, ChevronRight, Star, Loader2, Check, RefreshCw,
+    AlertTriangle, CheckCircle, HelpCircle, Clock
 } from 'lucide-react';
 import type { ShopProduct } from '@/lib/shopProducts';
 
@@ -30,8 +31,52 @@ interface CJProductResult {
     productWeight: number;
 }
 
+interface SyncSummary {
+    total: number;
+    active: number;
+    discontinued: number;
+    unknown: number;
+    lastSyncedAt: string | null;
+    discontinuedProducts: Array<{
+        id: string;
+        name: string;
+        cjPid: string;
+        discontinuedAt: string;
+        discontinuedReason: string;
+        visible: boolean;
+    }>;
+}
+
 function getToken() {
     return sessionStorage.getItem('admin-auth') || '';
+}
+
+function CJStatusBadge({ status }: { status?: string }) {
+    if (!status || status === 'unknown') {
+        return (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2 py-1 rounded-md bg-gray-100 text-gray-500">
+                <HelpCircle className="w-3 h-3" />
+                未同步
+            </span>
+        );
+    }
+    if (status === 'active') {
+        return (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2 py-1 rounded-md bg-green-50 text-green-600">
+                <CheckCircle className="w-3 h-3" />
+                在售
+            </span>
+        );
+    }
+    if (status === 'discontinued') {
+        return (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2 py-1 rounded-md bg-red-50 text-red-600">
+                <AlertTriangle className="w-3 h-3" />
+                已下架
+            </span>
+        );
+    }
+    return null;
 }
 
 export default function AdminProductsPage() {
@@ -40,9 +85,14 @@ export default function AdminProductsPage() {
     const [showImportModal, setShowImportModal] = useState(false);
     const [editProduct, setEditProduct] = useState<ShopProduct | null>(null);
     const [saveMessage, setSaveMessage] = useState('');
+    const [syncStatus, setSyncStatus] = useState<SyncSummary | null>(null);
+    const [syncing, setSyncing] = useState(false);
+    const [syncMessage, setSyncMessage] = useState('');
+    const [syncingProductId, setSyncingProductId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchProducts();
+        fetchSyncStatus();
     }, []);
 
     async function fetchProducts() {
@@ -56,6 +106,63 @@ export default function AdminProductsPage() {
             console.error('Failed to fetch:', error);
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function fetchSyncStatus() {
+        try {
+            const res = await fetch('/api/cj/sync-status');
+            const data = await res.json();
+            if (data.success) setSyncStatus(data.data);
+        } catch (error) {
+            console.error('Failed to fetch sync status:', error);
+        }
+    }
+
+    async function syncAllProducts() {
+        if (!confirm('将检查所有 CJ 商品的上架状态，已下架商品将自动隐藏。此操作可能需要几分钟，确认继续？')) return;
+        setSyncing(true);
+        setSyncMessage('正在同步商品状态...');
+        try {
+            const res = await fetch('/api/cj/sync-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ autoHide: true }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                const { synced, discontinued, errors } = data.data;
+                setSyncMessage(`✅ 同步完成：检查 ${synced} 个商品，${discontinued} 个已下架，${errors} 个错误`);
+                fetchProducts();
+                fetchSyncStatus();
+            } else {
+                setSyncMessage(`❌ 同步失败：${data.error}`);
+            }
+        } catch (error) {
+            setSyncMessage(`❌ 同步出错：${error instanceof Error ? error.message : '未知错误'}`);
+        } finally {
+            setSyncing(false);
+            setTimeout(() => setSyncMessage(''), 8000);
+        }
+    }
+
+    async function syncSingleProduct(product: ShopProduct) {
+        setSyncingProductId(product.id);
+        try {
+            const res = await fetch('/api/cj/sync-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productIds: [product.id], autoHide: true }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                fetchProducts();
+                fetchSyncStatus();
+            }
+        } catch (error) {
+            console.error('Single sync failed:', error);
+        } finally {
+            setSyncingProductId(null);
         }
     }
 
@@ -112,19 +219,96 @@ export default function AdminProductsPage() {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-text-primary">Products</h1>
                     <p className="text-text-muted mt-1">{products.length} products total</p>
                 </div>
-                <button
-                    onClick={() => setShowImportModal(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-[#2D6A44] text-white font-bold rounded-xl transition-colors shadow-lg"
-                >
-                    <Download className="w-5 h-5" />
-                    Import from CJ
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={syncAllProducts}
+                        disabled={syncing}
+                        className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors shadow-lg disabled:opacity-50"
+                        title="检查所有 CJ 商品状态，自动下架已失效商品"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                        {syncing ? '同步中...' : '同步 CJ 状态'}
+                    </button>
+                    <button
+                        onClick={() => setShowImportModal(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-[#2D6A44] text-white font-bold rounded-xl transition-colors shadow-lg"
+                    >
+                        <Download className="w-5 h-5" />
+                        Import from CJ
+                    </button>
+                </div>
             </div>
+
+            {/* Sync Status Summary */}
+            {syncStatus && (
+                <div className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-2xl border border-[#E5E4E1] p-4">
+                        <p className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-1">总商品</p>
+                        <p className="text-2xl font-bold text-text-primary">{syncStatus.total}</p>
+                    </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E4E1] p-4">
+                        <p className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-1">在售</p>
+                        <p className="text-2xl font-bold text-green-600">{syncStatus.active}</p>
+                    </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E4E1] p-4">
+                        <p className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-1">已下架</p>
+                        <p className="text-2xl font-bold text-red-600">{syncStatus.discontinued}</p>
+                    </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E4E1] p-4">
+                        <p className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-1">未同步</p>
+                        <p className="text-2xl font-bold text-gray-500">{syncStatus.unknown}</p>
+                        {syncStatus.lastSyncedAt && (
+                            <p className="text-[10px] text-text-muted mt-1 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {new Date(syncStatus.lastSyncedAt).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Discontinued Products Alert */}
+            {syncStatus && syncStatus.discontinued > 0 && (
+                <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4">
+                    <div className="flex items-start gap-3">
+                        <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold text-red-700 mb-2">
+                                发现 {syncStatus.discontinued} 个商品已在 CJDropshipping 下架
+                            </p>
+                            <div className="space-y-1">
+                                {syncStatus.discontinuedProducts.map(p => (
+                                    <div key={p.id} className="flex items-center gap-2 text-xs text-red-600">
+                                        <span className="font-medium">{p.name}</span>
+                                        {p.discontinuedReason && (
+                                            <span className="text-red-400">— {p.discontinuedReason.replace(/^CJ API:\s*/i, '').slice(0, 80)}</span>
+                                        )}
+                                        {p.visible && (
+                                            <span className="bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold">仍在展示</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {syncMessage && (
+                <div className={`mb-4 px-4 py-3 rounded-xl flex items-center gap-2 font-medium text-sm ${
+                    syncMessage.startsWith('✅') ? 'bg-green-50 text-green-700' :
+                    syncMessage.startsWith('❌') ? 'bg-red-50 text-red-700' :
+                    'bg-blue-50 text-blue-700'
+                }`}>
+                    {syncing && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {syncMessage}
+                </div>
+            )}
 
             {saveMessage && (
                 <div className="mb-4 px-4 py-3 bg-green-50 text-green-700 rounded-xl flex items-center gap-2 font-medium">
@@ -157,18 +341,23 @@ export default function AdminProductsPage() {
                                     <th className="text-left px-4 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">Category</th>
                                     <th className="text-left px-4 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">Cost</th>
                                     <th className="text-left px-4 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">Price</th>
-                                    <th className="text-left px-4 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">Status</th>
+                                    <th className="text-left px-4 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">状态</th>
                                     <th className="text-right px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#E5E4E1]">
                                 {products.map(product => (
-                                    <tr key={product.id} className="hover:bg-surface-bg/50 transition-colors">
+                                    <tr key={product.id} className={`hover:bg-surface-bg/50 transition-colors ${product.cjStatus === 'discontinued' ? 'bg-red-50/30' : ''}`}>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-14 h-14 bg-surface-bg rounded-xl overflow-hidden shrink-0">
+                                                <div className="w-14 h-14 bg-surface-bg rounded-xl overflow-hidden shrink-0 relative">
                                                     {product.images[0] && (
-                                                        <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                                                        <img src={product.images[0]} alt="" className={`w-full h-full object-cover ${product.cjStatus === 'discontinued' ? 'grayscale opacity-60' : ''}`} />
+                                                    )}
+                                                    {product.cjStatus === 'discontinued' && (
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
+                                                            <AlertTriangle className="w-5 h-5 text-red-500" />
+                                                        </div>
                                                     )}
                                                 </div>
                                                 <div className="min-w-0">
@@ -183,7 +372,17 @@ export default function AdminProductsPage() {
                                                         );
                                                     })()}
                                                     <p className="text-xs text-text-muted mb-1.5 mt-0.5">SKU: {product.sku}</p>
-                                                    <div className="flex flex-wrap gap-1.5">
+                                                    {product.cjStatus === 'discontinued' && product.discontinuedReason && (
+                                                        <p className="text-[10px] text-red-500 mb-1 max-w-[250px] truncate" title={product.discontinuedReason}>
+                                                            ⚠️ {product.discontinuedReason.replace(/^CJ API:\s*/i, '')}
+                                                        </p>
+                                                    )}
+                                                    {product.lastSyncedAt && (
+                                                        <p className="text-[10px] text-text-muted">
+                                                            同步: {new Date(product.lastSyncedAt).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                        </p>
+                                                    )}
+                                                    <div className="flex flex-wrap gap-1.5 mt-1">
                                                         {product.cjPid && product.cjPid.length > 5 && (
                                                             <a href={`https://cjdropshipping.com/product/${product.cjPid.toLowerCase()}.html`} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
                                                                 CJ Source
@@ -213,20 +412,33 @@ export default function AdminProductsPage() {
                                             <span className="text-sm font-bold text-primary-600">${product.price.toFixed(2)}</span>
                                         </td>
                                         <td className="px-4 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md ${product.visible ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'
-                                                    }`}>
-                                                    {product.visible ? 'Visible' : 'Hidden'}
-                                                </span>
-                                                {product.featured && (
-                                                    <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-md bg-yellow-50 text-yellow-600">
-                                                        Featured
+                                            <div className="flex flex-col gap-1.5">
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md ${product.visible ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                                                        {product.visible ? 'Visible' : 'Hidden'}
                                                     </span>
-                                                )}
+                                                    {product.featured && (
+                                                        <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-md bg-yellow-50 text-yellow-600">
+                                                            Featured
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <CJStatusBadge status={product.cjStatus} />
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-1">
+                                                {/* Single product sync button */}
+                                                {product.cjPid && (
+                                                    <button
+                                                        onClick={() => syncSingleProduct(product)}
+                                                        disabled={syncingProductId === product.id}
+                                                        className="w-9 h-9 rounded-lg flex items-center justify-center text-text-muted hover:text-blue-600 hover:bg-blue-50 transition-all"
+                                                        title="检查此商品 CJ 状态"
+                                                    >
+                                                        <RefreshCw className={`w-4 h-4 ${syncingProductId === product.id ? 'animate-spin text-blue-600' : ''}`} />
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={() => toggleVisibility(product)}
                                                     className="w-9 h-9 rounded-lg flex items-center justify-center text-text-muted hover:text-primary-600 hover:bg-primary-50 transition-all"
@@ -236,8 +448,7 @@ export default function AdminProductsPage() {
                                                 </button>
                                                 <button
                                                     onClick={() => toggleFeatured(product)}
-                                                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${product.featured ? 'text-yellow-500 bg-yellow-50' : 'text-text-muted hover:text-yellow-500 hover:bg-yellow-50'
-                                                        }`}
+                                                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${product.featured ? 'text-yellow-500 bg-yellow-50' : 'text-text-muted hover:text-yellow-500 hover:bg-yellow-50'}`}
                                                     title={product.featured ? 'Unfeature' : 'Feature'}
                                                 >
                                                     <Star className="w-4 h-4" fill={product.featured ? 'currentColor' : 'none'} />
@@ -503,11 +714,34 @@ function EditModal({ product, onClose, onSave }: {
             <div className="bg-white rounded-[32px] w-full max-w-[600px] max-h-[85vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
                 {/* Header */}
                 <div className="flex items-center justify-between px-8 py-6 border-b border-[#E5E4E1] sticky top-0 bg-white rounded-t-[32px] z-10">
-                    <h2 className="text-xl font-bold text-text-primary">Edit Product</h2>
+                    <div>
+                        <h2 className="text-xl font-bold text-text-primary">Edit Product</h2>
+                        {product.cjStatus === 'discontinued' && (
+                            <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                                <AlertTriangle className="w-3 h-3" />
+                                此商品已在 CJDropshipping 下架
+                            </p>
+                        )}
+                    </div>
                     <button onClick={onClose} className="w-10 h-10 rounded-full bg-surface-bg flex items-center justify-center hover:bg-gray-200 transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
+
+                {/* Discontinued Notice */}
+                {product.cjStatus === 'discontinued' && (
+                    <div className="mx-8 mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                        <p className="text-sm font-bold text-red-700 mb-1">⚠️ 商品已下架</p>
+                        <p className="text-xs text-red-600">
+                            {product.discontinuedReason || '该商品已在 CJDropshipping 下架或链接失效'}
+                        </p>
+                        {product.discontinuedAt && (
+                            <p className="text-xs text-red-400 mt-1">
+                                下架时间：{new Date(product.discontinuedAt).toLocaleString('zh-CN')}
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {/* Form */}
                 <div className="px-8 py-6 space-y-5">

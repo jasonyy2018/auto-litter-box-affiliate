@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Minus, Plus, ShoppingCart, ChevronRight, Truck, Shield, RotateCcw, Package } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, ChevronRight, Truck, Shield, RotateCcw, Package, AlertTriangle } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import type { ShopProduct } from '@/lib/shopProducts';
 import ShopProductCard from '@/components/ShopProductCard';
@@ -34,7 +34,7 @@ export default function ShopProductDetailPage() {
                 // Get related products (same category, different product)
                 if (found) {
                     const related = data.data.products
-                        .filter((p: ShopProduct) => p.id !== found.id)
+                        .filter((p: ShopProduct) => p.id !== found.id && p.cjStatus !== 'discontinued')
                         .slice(0, 4);
                     setRelatedProducts(related);
                 }
@@ -79,10 +79,12 @@ export default function ShopProductDetailPage() {
         );
     }
 
+    const isDiscontinued = product.cjStatus === 'discontinued';
     const currentVariant = product.variants.find(v => v.id === selectedVariant);
     const displayPrice = currentVariant ? currentVariant.price : product.price;
 
     const handleAddToCart = () => {
+        if (isDiscontinued) return;
         addToCart({
             id: product.id,
             slug: product.slug,
@@ -96,6 +98,28 @@ export default function ShopProductDetailPage() {
 
     return (
         <div className="bg-white min-h-screen">
+            {/* Discontinued Banner */}
+            {isDiscontinued && (
+                <div className="bg-red-600 text-white py-3 px-6">
+                    <div className="max-w-[1400px] mx-auto flex items-center gap-3">
+                        <AlertTriangle className="w-5 h-5 shrink-0" />
+                        <div>
+                            <span className="font-bold">此商品已下架</span>
+                            {product.discontinuedReason && (
+                                <span className="ml-2 text-red-100 text-sm">
+                                    — {product.discontinuedReason.replace(/^CJ API:\s*/i, '')}
+                                </span>
+                            )}
+                            {product.discontinuedAt && (
+                                <span className="ml-2 text-red-200 text-xs">
+                                    （下架时间：{new Date(product.discontinuedAt).toLocaleDateString('zh-CN')}）
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Breadcrumb */}
             <div className="max-w-[1400px] mx-auto px-6 lg:px-20 py-6">
                 <nav className="flex items-center gap-2 text-sm text-text-muted">
@@ -112,12 +136,20 @@ export default function ShopProductDetailPage() {
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
                     {/* Left: Images */}
                     <div>
-                        <div className="aspect-square bg-surface-bg rounded-[32px] overflow-hidden mb-4">
+                        <div className={`aspect-square bg-surface-bg rounded-[32px] overflow-hidden mb-4 relative ${isDiscontinued ? 'opacity-60' : ''}`}>
+                            {isDiscontinued && (
+                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-red-50/60">
+                                    <div className="bg-red-500 text-white px-6 py-3 rounded-full font-bold text-lg flex items-center gap-2 shadow-lg">
+                                        <AlertTriangle className="w-5 h-5" />
+                                        已下架
+                                    </div>
+                                </div>
+                            )}
                             {product.images[selectedImage] ? (
                                 <img
                                     src={product.images[selectedImage]}
                                     alt={product.name}
-                                    className="w-full h-full object-contain p-8"
+                                    className={`w-full h-full object-contain p-8 ${isDiscontinued ? 'grayscale' : ''}`}
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-text-muted">
@@ -134,7 +166,7 @@ export default function ShopProductDetailPage() {
                                         className={`w-20 h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${selectedImage === i ? 'border-primary-600 scale-105' : 'border-[#E5E4E1] hover:border-primary-300'
                                             }`}
                                     >
-                                        <img src={img} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
+                                        <img src={img} alt={`${product.name} ${i + 1}`} className={`w-full h-full object-cover ${isDiscontinued ? 'grayscale' : ''}`} />
                                     </button>
                                 ))}
                             </div>
@@ -147,11 +179,13 @@ export default function ShopProductDetailPage() {
                         <h1 className="text-3xl lg:text-[40px] font-bold text-text-primary leading-tight mb-4">{product.name}</h1>
 
                         <div className="flex items-baseline gap-3 mb-6">
-                            <span className="text-3xl font-bold text-primary-600">${displayPrice.toFixed(2)}</span>
-                            {product.originalPrice && (
+                            <span className={`text-3xl font-bold ${isDiscontinued ? 'text-text-muted line-through' : 'text-primary-600'}`}>
+                                ${displayPrice.toFixed(2)}
+                            </span>
+                            {!isDiscontinued && product.originalPrice && (
                                 <span className="text-xl text-text-muted line-through">${product.originalPrice.toFixed(2)}</span>
                             )}
-                            {product.originalPrice && (
+                            {!isDiscontinued && product.originalPrice && (
                                 <span className="px-3 py-1 bg-red-50 text-red-600 text-sm font-bold rounded-lg">
                                     Save ${(product.originalPrice - displayPrice).toFixed(2)}
                                 </span>
@@ -160,8 +194,36 @@ export default function ShopProductDetailPage() {
 
                         <p className="text-text-secondary leading-relaxed mb-8">{product.description || product.shortDescription}</p>
 
-                        {/* Variants */}
-                        {product.variants.length > 0 && (
+                        {/* Discontinued Notice */}
+                        {isDiscontinued && (
+                            <div className="mb-8 p-5 bg-red-50 border border-red-200 rounded-2xl">
+                                <div className="flex items-start gap-3">
+                                    <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-bold text-red-700 mb-1">此商品已在 CJDropshipping 下架</p>
+                                        <p className="text-sm text-red-600">
+                                            {product.discontinuedReason
+                                                ? product.discontinuedReason.replace(/^CJ API:\s*/i, '')
+                                                : '该商品已停止供应，无法购买。'}
+                                        </p>
+                                        {product.discontinuedAt && (
+                                            <p className="text-xs text-red-400 mt-1">
+                                                下架时间：{new Date(product.discontinuedAt).toLocaleString('zh-CN')}
+                                            </p>
+                                        )}
+                                        <Link
+                                            href="/shop"
+                                            className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-red-600 hover:text-red-700 underline"
+                                        >
+                                            浏览其他商品 →
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Variants - only show for active products */}
+                        {!isDiscontinued && product.variants.length > 0 && (
                             <div className="mb-8">
                                 <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider mb-3">Options</h3>
                                 <div className="flex flex-wrap gap-3">
@@ -183,7 +245,7 @@ export default function ShopProductDetailPage() {
 
                         {/* Quantity & Add to Cart */}
                         <div className="flex items-center gap-4 mb-8">
-                            {!product.amazonLink && !product.affiliateLink && (
+                            {!isDiscontinued && !product.amazonLink && !product.affiliateLink && (
                                 <div className="flex items-center gap-1 bg-surface-bg rounded-xl border border-[#E5E4E1]">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -200,7 +262,12 @@ export default function ShopProductDetailPage() {
                                     </button>
                                 </div>
                             )}
-                            {product.amazonLink || product.affiliateLink ? (
+                            {isDiscontinued ? (
+                                <div className="flex-1 py-4 bg-gray-100 text-gray-400 font-bold text-lg rounded-xl flex items-center justify-center gap-3 cursor-not-allowed select-none">
+                                    <AlertTriangle className="w-5 h-5" />
+                                    商品已下架，无法购买
+                                </div>
+                            ) : product.amazonLink || product.affiliateLink ? (
                                 <a
                                     href={product.amazonLink || product.affiliateLink}
                                     target="_blank"

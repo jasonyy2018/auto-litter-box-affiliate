@@ -300,6 +300,69 @@ export async function getProductDetail(pid: string): Promise<CJProduct> {
 }
 
 /**
+ * Check CJ product availability status
+ * Returns whether the product is still active on CJDropshipping
+ */
+export async function checkProductStatus(pid: string): Promise<{
+    status: 'active' | 'discontinued' | 'unknown';
+    reason?: string;
+}> {
+    try {
+        const token = await getAccessToken();
+
+        const response = await httpsFetch(`${CJ_BASE_URL}/product/query?pid=${pid}`, {
+            method: 'GET',
+            headers: {
+                'CJ-Access-Token': token,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            // HTTP error - could be network issue or product not found
+            if (response.status === 404) {
+                return { status: 'discontinued', reason: 'Product not found on CJDropshipping (404)' };
+            }
+            return { status: 'unknown', reason: `HTTP error: ${response.status}` };
+        }
+
+        const data: CJApiResponse<any> = await response.json();
+
+        if (!data.result) {
+            // API returned error - check message for clues
+            const msg = (data.message || '').toLowerCase();
+            if (
+                msg.includes('not found') ||
+                msg.includes('does not exist') ||
+                msg.includes('no product') ||
+                msg.includes('invalid') ||
+                msg.includes('offline') ||
+                msg.includes('下架') ||
+                msg.includes('不存在')
+            ) {
+                return { status: 'discontinued', reason: `CJ API: ${data.message}` };
+            }
+            // Other API errors (rate limit, auth, etc.) - treat as unknown
+            return { status: 'unknown', reason: `CJ API error: ${data.message}` };
+        }
+
+        // Product found and active
+        const product = data.data;
+        if (!product || !product.pid) {
+            return { status: 'discontinued', reason: 'Product data empty or invalid' };
+        }
+
+        return { status: 'active' };
+    } catch (err: any) {
+        const msg = (err?.message || '').toLowerCase();
+        if (msg.includes('timeout') || msg.includes('proxy')) {
+            return { status: 'unknown', reason: `Network error: ${err.message}` };
+        }
+        return { status: 'unknown', reason: `Error: ${err.message}` };
+    }
+}
+
+/**
  * Get CJ product categories
  */
 export async function getCategories(): Promise<unknown[]> {

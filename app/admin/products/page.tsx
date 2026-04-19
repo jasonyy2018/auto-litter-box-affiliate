@@ -360,45 +360,59 @@ export default function AdminProductsPage() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="min-w-0">
+                                                 <div className="min-w-0">
                                                     {(() => {
-                                                        const link = product.amazonLink || product.affiliateLink || (product.cjPid && product.cjPid.length > 5 ? `https://cjdropshipping.com/product/${product.cjPid.toLowerCase()}.html` : null);
-                                                        return link ? (
+                                                        const cjSlug = (product.slug || product.name || 'item')
+                                                            .toLowerCase()
+                                                            .replace(/[^a-z0-9\s-]/g, '')
+                                                            .replace(/\s+/g, '-')
+                                                            .replace(/-+/g, '-')
+                                                            .replace(/^-|-$/g, '') || 'item';
+                                                        const cjSourceUrl = product.cjPid && product.cjPid.length > 5
+                                                            ? `https://www.cjdropshipping.com/product/${cjSlug}-p-${product.cjPid}.html`
+                                                            : null;
+                                                        const link = product.amazonLink || product.affiliateLink || cjSourceUrl;
+                                                        const nameEl = link ? (
                                                             <a href={link} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-text-primary hover:text-primary-600 hover:underline truncate max-w-[250px] block transition-colors">
                                                                 {product.name}
                                                             </a>
                                                         ) : (
                                                             <p className="text-sm font-bold text-text-primary truncate max-w-[250px]">{product.name}</p>
                                                         );
+                                                        return (
+                                                            <>
+                                                                {nameEl}
+                                                                <p className="text-xs text-text-muted mb-1.5 mt-0.5">SKU: {product.sku}</p>
+                                                                {product.cjStatus === 'discontinued' && product.discontinuedReason && (
+                                                                    <p className="text-[10px] text-red-500 mb-1 max-w-[250px] truncate" title={product.discontinuedReason}>
+                                                                        ⚠️ {product.discontinuedReason.replace(/^CJ API:\s*/i, '')}
+                                                                    </p>
+                                                                )}
+                                                                {product.lastSyncedAt && (
+                                                                    <p className="text-[10px] text-text-muted">
+                                                                        同步: {new Date(product.lastSyncedAt).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                                    </p>
+                                                                )}
+                                                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                                                    {cjSourceUrl && (
+                                                                        <a href={cjSourceUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
+                                                                            CJ Source
+                                                                        </a>
+                                                                    )}
+                                                                    {product.amazonLink && (
+                                                                        <a href={product.amazonLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded border border-orange-100 hover:bg-orange-100 transition-colors">
+                                                                            Amazon
+                                                                        </a>
+                                                                    )}
+                                                                    {product.affiliateLink && (
+                                                                        <a href={product.affiliateLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 hover:bg-purple-100 transition-colors">
+                                                                            Affiliate
+                                                                        </a>
+                                                                    )}
+                                                                </div>
+                                                            </>
+                                                        );
                                                     })()}
-                                                    <p className="text-xs text-text-muted mb-1.5 mt-0.5">SKU: {product.sku}</p>
-                                                    {product.cjStatus === 'discontinued' && product.discontinuedReason && (
-                                                        <p className="text-[10px] text-red-500 mb-1 max-w-[250px] truncate" title={product.discontinuedReason}>
-                                                            ⚠️ {product.discontinuedReason.replace(/^CJ API:\s*/i, '')}
-                                                        </p>
-                                                    )}
-                                                    {product.lastSyncedAt && (
-                                                        <p className="text-[10px] text-text-muted">
-                                                            同步: {new Date(product.lastSyncedAt).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                                        </p>
-                                                    )}
-                                                    <div className="flex flex-wrap gap-1.5 mt-1">
-                                                        {product.cjPid && product.cjPid.length > 5 && (
-                                                            <a href={`https://cjdropshipping.com/product/${product.cjPid.toLowerCase()}.html`} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 hover:bg-blue-100 transition-colors">
-                                                                CJ Source
-                                                            </a>
-                                                        )}
-                                                        {product.amazonLink && (
-                                                            <a href={product.amazonLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded border border-orange-100 hover:bg-orange-100 transition-colors">
-                                                                Amazon
-                                                            </a>
-                                                        )}
-                                                        {product.affiliateLink && (
-                                                            <a href={product.affiliateLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded border border-purple-100 hover:bg-purple-100 transition-colors">
-                                                                Affiliate
-                                                            </a>
-                                                        )}
-                                                    </div>
                                                 </div>
                                             </div>
                                         </td>

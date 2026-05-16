@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
     getAllShopProducts,
     addShopProduct,
+    addShopProducts,
     updateShopProduct,
     deleteShopProduct,
 } from '@/lib/shopProducts';
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, data: products });
 }
 
-// POST — import product from CJ
+// POST — import product(s) from CJ
 export async function POST(request: NextRequest) {
     if (!checkAuth(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -32,13 +33,54 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { cjProduct, customProduct, markup = 1.5 } = body;
+        const { cjProduct, cjProducts, customProduct, markup = 1.5 } = body;
 
         if (customProduct) {
             const newProduct = addShopProduct(customProduct);
             return NextResponse.json({ success: true, data: newProduct });
         }
 
+        // Batch import from CJ
+        if (cjProducts && Array.isArray(cjProducts)) {
+            const batchProducts = cjProducts.map((cj: any) => {
+                const sellingPrice = parseFloat((cj.sellPrice * markup).toFixed(2));
+                return {
+                    cjPid: cj.pid,
+                    name: cj.productNameEn || cj.productName,
+                    description: cj.description || cj.productBrief || '',
+                    shortDescription: cj.productBrief || cj.productNameEn || '',
+                    category: cj.categoryName || 'Uncategorized',
+                    images: cj.productImageSet?.length > 0
+                        ? cj.productImageSet
+                        : [cj.productImage].filter(Boolean),
+                    price: sellingPrice,
+                    costPrice: cj.sellPrice,
+                    originalPrice: parseFloat((sellingPrice * 1.2).toFixed(2)),
+                    currency: 'USD',
+                    variants: (cj.variants || []).map((v: any) => ({
+                        id: v.vid,
+                        name: v.variantNameEn || v.variantName,
+                        sku: v.variantSku,
+                        price: parseFloat((v.variantSellPrice * markup).toFixed(2)),
+                        costPrice: v.variantSellPrice,
+                        image: v.variantImage || '',
+                        properties: v.variantProperty || '',
+                        inStock: true,
+                    })),
+                    weight: cj.productWeight,
+                    sku: cj.productSku,
+                    inStock: true,
+                    visible: true,
+                    featured: false,
+                    tags: [],
+                };
+            });
+
+            const newProducts = addShopProducts(batchProducts);
+            return NextResponse.json({ success: true, data: newProducts, imported: newProducts.length });
+        }
+
+        // Single import from CJ
         if (!cjProduct || !cjProduct.pid) {
             return NextResponse.json({ error: 'Invalid CJ product data or custom product data' }, { status: 400 });
         }

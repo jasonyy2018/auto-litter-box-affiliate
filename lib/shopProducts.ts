@@ -116,6 +116,35 @@ export function addShopProduct(product: Omit<ShopProduct, 'id' | 'slug' | 'creat
     return newProduct;
 }
 
+export function addShopProducts(products: Array<Omit<ShopProduct, 'id' | 'slug' | 'createdAt' | 'updatedAt'>>): ShopProduct[] {
+    const allProducts = readProducts();
+    const newProducts: ShopProduct[] = [];
+
+    for (const product of products) {
+        let slug = generateSlug(product.name);
+        let counter = 1;
+        let originalSlug = slug;
+        while (allProducts.some(p => p.slug === slug)) {
+            slug = `${originalSlug}-${counter}`;
+            counter++;
+        }
+
+        const newProduct: ShopProduct = {
+            ...product,
+            id: `shop-${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${counter}`,
+            slug,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+
+        allProducts.push(newProduct);
+        newProducts.push(newProduct);
+    }
+
+    writeProducts(allProducts);
+    return newProducts;
+}
+
 export function updateShopProduct(id: string, updates: Partial<ShopProduct>): ShopProduct | null {
     const products = readProducts();
     const index = products.findIndex(p => p.id === id);

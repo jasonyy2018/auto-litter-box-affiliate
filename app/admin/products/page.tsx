@@ -520,9 +520,11 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
     const [results, setResults] = useState<CJProductResult[]>([]);
     const [loading, setLoading] = useState(false);
     const [importing, setImporting] = useState<string | null>(null);
+    const [importingBatch, setImportingBatch] = useState(false);
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [markup, setMarkup] = useState(1.5);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
     async function handleSearch(newPage = 1) {
         if (!searchQuery.trim()) return;
@@ -534,6 +536,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                 setResults(data.data.list || []);
                 setTotal(data.data.total || 0);
                 setPage(newPage);
+                setSelectedIds(new Set());
             }
         } catch (error) {
             console.error('Search failed:', error);
@@ -562,6 +565,49 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
             setImporting(null);
         }
     }
+
+    async function handleBatchImport() {
+        if (selectedIds.size === 0) return;
+        setImportingBatch(true);
+        try {
+            const selectedProducts = results.filter(p => selectedIds.has(p.pid));
+            const res = await fetch('/api/admin/products', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${getToken()}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cjProducts: selectedProducts, markup }),
+            });
+            if (res.ok) {
+                onImported();
+            }
+        } catch (error) {
+            console.error('Batch import failed:', error);
+        } finally {
+            setImportingBatch(false);
+        }
+    }
+
+    function toggleSelect(pid: string) {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(pid)) next.delete(pid);
+            else next.add(pid);
+            return next;
+        });
+    }
+
+    function toggleSelectAll() {
+        if (selectedIds.size === results.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(results.map(p => p.pid)));
+        }
+    }
+
+    const isAllSelected = results.length > 0 && selectedIds.size === results.length;
+    const isPartiallySelected = selectedIds.size > 0 && selectedIds.size < results.length;
 
     useEffect(() => {
         handleSearch();
@@ -617,6 +663,44 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                     </button>
                 </div>
 
+                {/* Selection Bar */}
+                {results.length > 0 && (
+                    <div className="px-8 py-3 border-b border-[#E5E4E1] bg-surface-bg/50 flex items-center justify-between">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                            <div className="relative">
+                                <input
+                                    type="checkbox"
+                                    checked={isAllSelected}
+                                    onChange={toggleSelectAll}
+                                    className="sr-only peer"
+                                />
+                                <div className={`w-5 h-5 rounded border-2 transition-all flex items-center justify-center ${
+                                    isAllSelected ? 'bg-primary-600 border-primary-600' :
+                                    isPartiallySelected ? 'bg-primary-600 border-primary-600' :
+                                    'border-gray-300 bg-white'
+                                }`}>
+                                    {isAllSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                                    {isPartiallySelected && <div className="w-2 h-0.5 bg-white rounded" />}
+                                </div>
+                            </div>
+                            <span className="text-sm font-semibold text-text-primary">
+                                {selectedIds.size > 0 ? `已选 ${selectedIds.size} 个` : '全选'}
+                            </span>
+                        </label>
+                        <button
+                            onClick={handleBatchImport}
+                            disabled={selectedIds.size === 0 || importingBatch}
+                            className="px-5 py-2 bg-primary-600 hover:bg-[#2D6A44] text-white text-sm font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            {importingBatch ? (
+                                <><Loader2 className="w-4 h-4 animate-spin" /> 导入中...</>
+                            ) : (
+                                <><Download className="w-4 h-4" /> 导入已选 ({selectedIds.size})</>
+                            )}
+                        </button>
+                    </div>
+                )}
+
                 {/* Results */}
                 <div className="flex-1 overflow-y-auto px-8 py-6">
                     {loading ? (
@@ -634,8 +718,21 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                     ) : results.length > 0 ? (
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                             {results.map(product => (
-                                <div key={product.pid} className="rounded-2xl border border-[#E5E4E1] overflow-hidden hover:shadow-md transition-shadow">
-                                    <div className="aspect-square bg-surface-bg p-4">
+                                <div
+                                    key={product.pid}
+                                    className={`rounded-2xl border-2 overflow-hidden transition-all cursor-pointer ${
+                                        selectedIds.has(product.pid)
+                                            ? 'border-primary-600 shadow-md shadow-primary-600/10'
+                                            : 'border-[#E5E4E1] hover:shadow-md'
+                                    }`}
+                                    onClick={() => toggleSelect(product.pid)}
+                                >
+                                    <div className="aspect-square bg-surface-bg p-4 relative">
+                                        {selectedIds.has(product.pid) && (
+                                            <div className="absolute top-2 left-2 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center z-10">
+                                                <Check className="w-4 h-4 text-white" />
+                                            </div>
+                                        )}
                                         {product.productImage && (
                                             <img src={product.productImage} alt="" className="w-full h-full object-contain" />
                                         )}
@@ -656,9 +753,12 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                                             </div>
                                         </div>
                                         <button
-                                            onClick={() => handleImport(product)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleImport(product);
+                                            }}
                                             disabled={importing === product.pid}
-                                            className="w-full mt-3 py-2.5 bg-primary-600 hover:bg-[#2D6A44] text-white text-sm font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                            className="w-full mt-3 py-2.5 bg-surface-bg hover:bg-primary-50 text-primary-600 text-sm font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 border border-primary-200"
                                         >
                                             {importing === product.pid ? (
                                                 <><Loader2 className="w-4 h-4 animate-spin" /> Importing...</>
@@ -680,8 +780,28 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                 {/* Pagination */}
                 {totalPages > 1 && (
                     <div className="px-8 py-4 border-t border-[#E5E4E1] flex items-center justify-between">
-                        <span className="text-sm text-text-muted">{total} results</span>
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm text-text-muted">{total} results</span>
+                            {selectedIds.size > 0 && (
+                                <span className="text-sm font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-lg">
+                                    {selectedIds.size} selected
+                                </span>
+                            )}
+                        </div>
                         <div className="flex items-center gap-2">
+                            {selectedIds.size > 0 && (
+                                <button
+                                    onClick={handleBatchImport}
+                                    disabled={importingBatch}
+                                    className="px-4 py-2 bg-primary-600 hover:bg-[#2D6A44] text-white text-sm font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 mr-2"
+                                >
+                                    {importingBatch ? (
+                                        <><Loader2 className="w-4 h-4 animate-spin" /> 导入中...</>
+                                    ) : (
+                                        <><Download className="w-4 h-4" /> 导入已选</>
+                                    )}
+                                </button>
+                            )}
                             <button
                                 onClick={() => handleSearch(page - 1)}
                                 disabled={page <= 1}

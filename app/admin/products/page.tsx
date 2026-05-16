@@ -524,7 +524,8 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [markup, setMarkup] = useState(1.5);
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
+    const [selectedData, setSelectedData] = useState<Record<string, CJProductResult>>({});
 
     async function handleSearch(newPage = 1) {
         if (!searchQuery.trim()) return;
@@ -536,7 +537,6 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                 setResults(data.data.list || []);
                 setTotal(data.data.total || 0);
                 setPage(newPage);
-                setSelectedIds(new Set());
             }
         } catch (error) {
             console.error('Search failed:', error);
@@ -567,10 +567,12 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
     }
 
     async function handleBatchImport() {
-        if (selectedIds.size === 0) return;
+        const ids = Object.keys(selectedIds);
+        if (ids.length === 0) return;
         setImportingBatch(true);
         try {
-            const selectedProducts = results.filter(p => selectedIds.has(p.pid));
+            const selectedProducts = ids.map(id => selectedData[id]).filter(Boolean);
+            if (selectedProducts.length === 0) return;
             const res = await fetch('/api/admin/products', {
                 method: 'POST',
                 headers: {
@@ -589,25 +591,51 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
         }
     }
 
-    function toggleSelect(pid: string) {
+    function toggleSelect(pid: string, product: CJProductResult) {
         setSelectedIds(prev => {
-            const next = new Set(prev);
-            if (next.has(pid)) next.delete(pid);
-            else next.add(pid);
-            return next;
+            if (prev[pid]) {
+                const { [pid]: _, ...rest } = prev;
+                return rest;
+            }
+            return { ...prev, [pid]: true };
+        });
+        setSelectedData(prev => {
+            if (prev[pid]) {
+                const { [pid]: _, ...rest } = prev;
+                return rest;
+            }
+            return { ...prev, [pid]: product };
         });
     }
 
     function toggleSelectAll() {
-        if (selectedIds.size === results.length) {
-            setSelectedIds(new Set());
+        const currentPageIds = results.map(p => p.pid);
+        const allSelected = currentPageIds.every(id => selectedIds[id]);
+        if (allSelected) {
+            const newIds = { ...selectedIds };
+            const newData = { ...selectedData };
+            for (const id of currentPageIds) {
+                delete newIds[id];
+                delete newData[id];
+            }
+            setSelectedIds(newIds);
+            setSelectedData(newData);
         } else {
-            setSelectedIds(new Set(results.map(p => p.pid)));
+            const newIds = { ...selectedIds };
+            const newData = { ...selectedData };
+            for (const product of results) {
+                newIds[product.pid] = true;
+                newData[product.pid] = product;
+            }
+            setSelectedIds(newIds);
+            setSelectedData(newData);
         }
     }
 
-    const isAllSelected = results.length > 0 && selectedIds.size === results.length;
-    const isPartiallySelected = selectedIds.size > 0 && selectedIds.size < results.length;
+    const selectedCount = Object.keys(selectedIds).length;
+    const currentPageSelectedCount = results.filter(p => selectedIds[p.pid]).length;
+    const isAllSelected = results.length > 0 && currentPageSelectedCount === results.length;
+    const isPartiallySelected = currentPageSelectedCount > 0 && currentPageSelectedCount < results.length;
 
     useEffect(() => {
         handleSearch();
@@ -684,20 +712,25 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                                 </div>
                             </div>
                             <span className="text-sm font-semibold text-text-primary">
-                                {selectedIds.size > 0 ? `已选 ${selectedIds.size} 个` : '全选'}
+                                {selectedCount > 0 ? `已选 ${selectedCount} 个` : '全选'}
                             </span>
                         </label>
-                        <button
-                            onClick={handleBatchImport}
-                            disabled={selectedIds.size === 0 || importingBatch}
-                            className="px-5 py-2 bg-primary-600 hover:bg-[#2D6A44] text-white text-sm font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                            {importingBatch ? (
-                                <><Loader2 className="w-4 h-4 animate-spin" /> 导入中...</>
-                            ) : (
-                                <><Download className="w-4 h-4" /> 导入已选 ({selectedIds.size})</>
+                        <div className="flex items-center gap-3">
+                            {selectedCount > 0 && (
+                                <span className="text-xs text-text-muted">跨页已选 {selectedCount} 个</span>
                             )}
-                        </button>
+                            <button
+                                onClick={handleBatchImport}
+                                disabled={selectedCount === 0 || importingBatch}
+                                className="px-5 py-2 bg-primary-600 hover:bg-[#2D6A44] text-white text-sm font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                {importingBatch ? (
+                                    <><Loader2 className="w-4 h-4 animate-spin" /> 导入中...</>
+                                ) : (
+                                    <><Download className="w-4 h-4" /> 导入已选 ({selectedCount})</>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -721,14 +754,14 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                                 <div
                                     key={product.pid}
                                     className={`rounded-2xl border-2 overflow-hidden transition-all cursor-pointer ${
-                                        selectedIds.has(product.pid)
+                                        selectedIds[product.pid]
                                             ? 'border-primary-600 shadow-md shadow-primary-600/10'
                                             : 'border-[#E5E4E1] hover:shadow-md'
                                     }`}
-                                    onClick={() => toggleSelect(product.pid)}
+                                    onClick={() => toggleSelect(product.pid, product)}
                                 >
                                     <div className="aspect-square bg-surface-bg p-4 relative">
-                                        {selectedIds.has(product.pid) && (
+                                        {selectedIds[product.pid] && (
                                             <div className="absolute top-2 left-2 w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center z-10">
                                                 <Check className="w-4 h-4 text-white" />
                                             </div>
@@ -782,14 +815,14 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                     <div className="px-8 py-4 border-t border-[#E5E4E1] flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <span className="text-sm text-text-muted">{total} results</span>
-                            {selectedIds.size > 0 && (
+                            {selectedCount > 0 && (
                                 <span className="text-sm font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-lg">
-                                    {selectedIds.size} selected
+                                    {selectedCount} selected
                                 </span>
                             )}
                         </div>
                         <div className="flex items-center gap-2">
-                            {selectedIds.size > 0 && (
+                            {selectedCount > 0 && (
                                 <button
                                     onClick={handleBatchImport}
                                     disabled={importingBatch}
@@ -798,7 +831,7 @@ function ImportModal({ onClose, onImported }: { onClose: () => void; onImported:
                                     {importingBatch ? (
                                         <><Loader2 className="w-4 h-4 animate-spin" /> 导入中...</>
                                     ) : (
-                                        <><Download className="w-4 h-4" /> 导入已选</>
+                                        <><Download className="w-4 h-4" /> 导入已选 ({selectedCount})</>
                                     )}
                                 </button>
                             )}

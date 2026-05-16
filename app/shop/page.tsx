@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, SlidersHorizontal, ChevronDown, Package } from 'lucide-react';
+import { Search, SlidersHorizontal, ChevronDown, Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import ShopProductCard from '@/components/ShopProductCard';
 import type { ShopProduct } from '@/lib/shopProducts';
 
@@ -12,15 +12,23 @@ export default function ShopPage() {
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [sortBy, setSortBy] = useState('newest');
     const [searchQuery, setSearchQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
+    const PAGE_SIZE = 20;
 
     useEffect(() => {
         fetchProducts();
-    }, [selectedCategory, sortBy]);
+    }, [selectedCategory, sortBy, page]);
 
     async function fetchProducts() {
         setLoading(true);
         try {
-            const params = new URLSearchParams({ sort: sortBy });
+            const params = new URLSearchParams({
+                sort: sortBy,
+                page: page.toString(),
+                size: PAGE_SIZE.toString(),
+            });
             if (selectedCategory) params.set('category', selectedCategory);
 
             const res = await fetch(`/api/shop/products?${params.toString()}`);
@@ -28,12 +36,24 @@ export default function ShopPage() {
             if (data.success) {
                 setProducts(data.data.products);
                 setCategories(data.data.categories);
+                setTotalPages(data.data.totalPages);
+                setTotal(data.data.total);
             }
         } catch (error) {
             console.error('Failed to fetch products:', error);
         } finally {
             setLoading(false);
         }
+    }
+
+    function handleCategoryChange(cat: string) {
+        setSelectedCategory(cat);
+        setPage(1);
+    }
+
+    function handleSortChange(s: string) {
+        setSortBy(s);
+        setPage(1);
     }
 
     const filteredProducts = searchQuery
@@ -82,7 +102,7 @@ export default function ShopPage() {
                         <div className="relative">
                             <select
                                 value={selectedCategory}
-                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                onChange={(e) => handleCategoryChange(e.target.value)}
                                 className="appearance-none pl-4 pr-10 py-3 bg-surface-bg rounded-xl text-sm font-medium text-text-primary cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-600/20"
                             >
                                 <option value="">All Categories</option>
@@ -97,7 +117,7 @@ export default function ShopPage() {
                         <div className="relative">
                             <select
                                 value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
+                                onChange={(e) => handleSortChange(e.target.value)}
                                 className="appearance-none pl-4 pr-10 py-3 bg-surface-bg rounded-xl text-sm font-medium text-text-primary cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-600/20"
                             >
                                 <option value="newest">Newest</option>
@@ -125,11 +145,50 @@ export default function ShopPage() {
                             ))}
                         </div>
                     ) : filteredProducts.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {filteredProducts.map(product => (
-                                <ShopProductCard key={product.id} product={product} />
-                            ))}
-                        </div>
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {filteredProducts.map(product => (
+                                    <ShopProductCard key={product.id} product={product} />
+                                ))}
+                            </div>
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="flex items-center justify-center gap-4 mt-12">
+                                    <button
+                                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                                        disabled={page <= 1}
+                                        className="w-10 h-10 rounded-xl border border-[#E5E4E1] flex items-center justify-center hover:bg-white disabled:opacity-30 transition-all disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronLeft className="w-5 h-5" />
+                                    </button>
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                                        <button
+                                            key={p}
+                                            onClick={() => setPage(p)}
+                                            className={`min-w-[40px] h-10 rounded-xl font-bold text-sm transition-all ${
+                                                p === page
+                                                    ? 'bg-primary-600 text-white shadow-md'
+                                                    : 'border border-[#E5E4E1] hover:bg-white'
+                                            }`}
+                                        >
+                                            {p}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={page >= totalPages}
+                                        className="w-10 h-10 rounded-xl border border-[#E5E4E1] flex items-center justify-center hover:bg-white disabled:opacity-30 transition-all disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronRight className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            )}
+
+                            <p className="text-center text-sm text-text-muted mt-4">
+                                Showing {((page - 1) * PAGE_SIZE) + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} products
+                            </p>
+                        </>
                     ) : (
                         <div className="flex flex-col items-center justify-center py-24 text-center">
                             <Package className="w-16 h-16 text-[#D1D0CD] mb-4" />

@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml* ./
 
 # Install dependencies
-RUN pnpm install --config.onlyBuiltDependencies="@prisma/client,@prisma/engines,prisma,sharp,@parcel/watcher,unrs-resolver"
+RUN pnpm install --frozen-lockfile
 
 # Copy the rest of the application
 COPY . .

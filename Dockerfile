@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml* ./
 
 # Install dependencies
-RUN pnpm install
+RUN pnpm install --allow-build @prisma/client @prisma/engines prisma sharp @parcel/watcher unrs-resolver
 
 # Copy the rest of the application
 COPY . .

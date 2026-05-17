@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkProductStatus } from '@/lib/cjApi';
-import { getAllShopProducts, updateShopProduct } from '@/lib/shopProducts';
+import { getAllShopProducts, bulkUpdateProducts } from '@/lib/shopProducts';
+
+/** Run promises with at most `concurrency` in-flight at a time */
+async function pLimit<T>(
+    tasks: (() => Promise<T>)[],
+    concurrency: number
+): Promise<T[]> {
+    const results: T[] = new Array(tasks.length);
+    let index = 0;
+    async function worker() {
+        while (index < tasks.length) {
+            const i = index++;
+            results[i] = await tasks[i]();
+        }
+    }
+    const workers = Array.from({ length: Math.min(concurrency, tasks.length) }, worker);
+    await Promise.all(workers);
+    return results;
+}
 
 /**
  * GET /api/cj/sync-status
@@ -77,9 +95,9 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        console.log(`[CJ Sync] Starting sync for ${productsToSync.length} products...`);
+        console.log(`[CJ Sync] Starting parallel sync for ${productsToSync.length} products (concurrency=5)...`);
 
-        const results: Array<{
+        type SyncResult = {
             id: string;
             name: string;
             cjPid: string;
@@ -87,18 +105,16 @@ export async function POST(request: NextRequest) {
             newStatus: string;
             reason?: string;
             autoHidden?: boolean;
-        }> = [];
+            updates?: Record<string, any>;
+        };
 
-        let discontinuedCount = 0;
-        let errorCount = 0;
+        const now = new Date().toISOString();
 
-        for (const product of productsToSync) {
+        // Run CJ API checks in parallel (5 at a time) — no per-request sleep
+        const tasks = productsToSync.map(product => async (): Promise<SyncResult> => {
             try {
-                console.log(`[CJ Sync] Checking product: ${product.name} (PID: ${product.cjPid})`);
-
                 const statusResult = await checkProductStatus(product.cjPid);
                 const previousStatus = product.cjStatus || 'unknown';
-                const now = new Date().toISOString();
 
                 const updates: Record<string, any> = {
                     cjStatus: statusResult.status,
@@ -108,59 +124,44 @@ export async function POST(request: NextRequest) {
                 let autoHidden = false;
 
                 if (statusResult.status === 'discontinued') {
-                    discontinuedCount++;
-                    // 只在首次发现下架时记录时间和原因
                     if (previousStatus !== 'discontinued') {
                         updates.discontinuedAt = now;
                         updates.discontinuedReason = statusResult.reason || 'Product discontinued on CJDropshipping';
-                        // 自动隐藏下架商品
                         if (autoHide && product.visible) {
                             updates.visible = false;
                             autoHidden = true;
                         }
-                        console.log(`[CJ Sync] ⚠️ Product DISCONTINUED: ${product.name} - ${statusResult.reason}`);
+                        console.log(`[CJ Sync] ⚠️ DISCONTINUED: ${product.name}`);
                     }
                 } else if (statusResult.status === 'active') {
-                    // 如果商品重新上架，清除下架信息
                     if (previousStatus === 'discontinued') {
                         updates.discontinuedAt = undefined;
                         updates.discontinuedReason = undefined;
-                        console.log(`[CJ Sync] ✅ Product RE-ACTIVATED: ${product.name}`);
+                        console.log(`[CJ Sync] ✅ RE-ACTIVATED: ${product.name}`);
                     }
                 } else {
-                    errorCount++;
                     console.warn(`[CJ Sync] ❓ Unknown status for ${product.name}: ${statusResult.reason}`);
                 }
 
-                // 更新商品状态
-                updateShopProduct(product.id, updates);
-
-                results.push({
-                    id: product.id,
-                    name: product.name,
-                    cjPid: product.cjPid,
-                    previousStatus,
-                    newStatus: statusResult.status,
-                    reason: statusResult.reason,
-                    autoHidden,
-                });
-
-                // 避免 CJ API 频率限制（每次请求间隔 1 秒）
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
+                return { id: product.id, name: product.name, cjPid: product.cjPid, previousStatus, newStatus: statusResult.status, reason: statusResult.reason, autoHidden, updates };
             } catch (err) {
-                errorCount++;
                 console.error(`[CJ Sync] Error checking ${product.name}:`, err);
-                results.push({
-                    id: product.id,
-                    name: product.name,
-                    cjPid: product.cjPid,
-                    previousStatus: product.cjStatus || 'unknown',
-                    newStatus: 'unknown',
-                    reason: err instanceof Error ? err.message : 'Unknown error',
-                });
+                return { id: product.id, name: product.name, cjPid: product.cjPid, previousStatus: product.cjStatus || 'unknown', newStatus: 'unknown', reason: err instanceof Error ? err.message : 'Unknown error' };
             }
+        });
+
+        const rawResults = await pLimit(tasks, 5);
+
+        // Single bulk write — one read + one write for all products
+        const bulkUpdates: Record<string, Record<string, any>> = {};
+        for (const r of rawResults) {
+            if (r.updates) bulkUpdates[r.id] = r.updates;
         }
+        bulkUpdateProducts(bulkUpdates);
+
+        const results = rawResults.map(({ updates: _u, ...rest }) => rest);
+        const discontinuedCount = results.filter(r => r.newStatus === 'discontinued').length;
+        const errorCount = results.filter(r => r.newStatus === 'unknown').length;
 
         console.log(`[CJ Sync] Complete. Synced: ${results.length}, Discontinued: ${discontinuedCount}, Errors: ${errorCount}`);
 

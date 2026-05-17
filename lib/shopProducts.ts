@@ -163,6 +163,22 @@ export function updateShopProduct(id: string, updates: Partial<ShopProduct>): Sh
     return products[index];
 }
 
+/**
+ * Apply a map of { productId -> partial updates } in a single read+write.
+ * Much faster than calling updateShopProduct() N times.
+ */
+export function bulkUpdateProducts(updates: Record<string, Partial<ShopProduct>>): void {
+    const products = readProducts();
+    const now = new Date().toISOString();
+    for (const product of products) {
+        const u = updates[product.id];
+        if (!u) continue;
+        const { id: _id, cjPid: _cjPid, ...safeUpdates } = u;
+        Object.assign(product, safeUpdates, { updatedAt: now });
+    }
+    writeProducts(products);
+}
+
 export function deleteShopProduct(id: string): boolean {
     const products = readProducts();
     const filtered = products.filter(p => p.id !== id);

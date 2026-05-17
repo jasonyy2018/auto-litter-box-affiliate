@@ -26,18 +26,22 @@ export default function ShopProductDetailPage() {
     async function fetchProduct() {
         setLoading(true);
         try {
-            const res = await fetch(`/api/shop/products`);
+            const res = await fetch(`/api/shop/products/${slug}`);
             const data = await res.json();
             if (data.success) {
-                const found = data.data.products.find((p: ShopProduct) => p.slug === slug);
-                setProduct(found || null);
-                // Get related products (same category, different product)
-                if (found) {
-                    const related = data.data.products
+                const found: ShopProduct = data.data.product;
+                setProduct(found);
+                // Get related products from the full listing
+                const relRes = await fetch(`/api/shop/products?size=100`);
+                const relData = await relRes.json();
+                if (relData.success) {
+                    const related = relData.data.products
                         .filter((p: ShopProduct) => p.id !== found.id && p.cjStatus !== 'discontinued')
                         .slice(0, 4);
                     setRelatedProducts(related);
                 }
+            } else {
+                setProduct(null);
             }
         } catch (error) {
             console.error('Failed to fetch product:', error);

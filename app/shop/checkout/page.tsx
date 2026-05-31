@@ -96,7 +96,7 @@ export default function CheckoutPage() {
     if (!isClientLoaded) return null;
     if (itemCount === 0) return null;
 
-    const finalShippingCost = shippingCost !== null ? shippingCost : 0;
+    const finalShippingCost = shippingCost !== null ? shippingCost : (subtotal >= 50 ? 0 : 9.95);
     const orderTotal = subtotal + finalShippingCost;
 
     // Check if the address form is completely filled and shipping is calculated

@@ -15,9 +15,28 @@ function generateSlug(name: string): string {
         .slice(0, 80);
 }
 
-function convertCJProduct(cj: CJProduct, markup: number, index: number): ShopProduct {
-    const costPrice = cj.sellPrice;
-    const sellPrice = Math.round(costPrice * markup * 100) / 100;
+function getDynamicMarkup(cost: number): number {
+    if (cost < 10) return 3.5;       // Accessories: 3.5x markup (e.g. $3 item -> $10.50)
+    if (cost < 50) return 2.5;       // Medium items: 2.5x markup (e.g. $30 item -> $75.00)
+    if (cost < 150) return 2.2;      // Standard boxes: 2.2x markup (e.g. $117 item -> $257.40)
+    return 1.6;                      // High-end boxes: 1.6x markup (e.g. $426 item -> $681.60)
+}
+
+function convertCJProduct(cj: CJProduct, baseMarkup: number, index: number): ShopProduct {
+    // Audit & filter out cheap accessory variants from defining the main product cost
+    const variantCosts = (cj.variants || []).map(v => v.variantSellPrice);
+    const maxCost = Math.max(...variantCosts, cj.sellPrice || 0);
+    
+    // Primary variant threshold: cheapest variant that is at least 25% of maxCost (or $30) to filter out $1 adapter bags
+    const threshold = maxCost > 50 ? Math.max(30, maxCost * 0.25) : 0;
+    const mainVariants = (cj.variants || []).filter(v => v.variantSellPrice >= threshold);
+    const primaryVariant = mainVariants.length > 0 
+        ? mainVariants.sort((a, b) => a.variantSellPrice - b.variantSellPrice)[0] 
+        : cj.variants?.[0];
+
+    const costPrice = primaryVariant ? primaryVariant.variantSellPrice : cj.sellPrice;
+    const dynamicMarkup = getDynamicMarkup(costPrice);
+    const sellPrice = Math.round(costPrice * dynamicMarkup * 100) / 100;
     const originalPrice = Math.round(sellPrice * 1.3 * 100) / 100;
 
     const images: string[] = [];
@@ -30,20 +49,22 @@ function convertCJProduct(cj: CJProduct, markup: number, index: number): ShopPro
         }
     }
 
-    const variants: ShopVariant[] = (cj.variants || []).map((v, vi) => ({
-        id: `cj-var-${v.vid || vi}`,
-        name: v.variantNameEn || v.variantName || `Variant ${vi + 1}`,
-        sku: v.variantSku || `${cj.productSku}-V${vi}`,
-        price: Math.round(v.variantSellPrice * markup * 100) / 100,
-        costPrice: v.variantSellPrice,
-        image: v.variantImage || '',
-        properties: v.variantProperty || v.variantNameEn || '',
-        inStock: true,
-    }));
+    const variants: ShopVariant[] = (cj.variants || []).map((v, vi) => {
+        const vMarkup = getDynamicMarkup(v.variantSellPrice);
+        return {
+            id: `cj-var-${v.vid || vi}`,
+            name: v.variantNameEn || v.variantName || `Variant ${vi + 1}`,
+            sku: v.variantSku || `${cj.productSku}-V${vi}`,
+            price: Math.round(v.variantSellPrice * vMarkup * 100) / 100,
+            costPrice: v.variantSellPrice,
+            image: v.variantImage || '',
+            properties: v.variantProperty || v.variantNameEn || '',
+            inStock: true,
+        };
+    });
 
     // Clean up description HTML
     let description = cj.description || cj.productBrief || '';
-    // Remove overly long HTML descriptions, keep a reasonable length
     if (description.length > 5000) {
         description = description.slice(0, 5000);
     }
@@ -58,7 +79,7 @@ function convertCJProduct(cj: CJProduct, markup: number, index: number): ShopPro
         description,
         shortDescription: (cj.productBrief || name).slice(0, 200),
         category: cj.categoryName || 'Smart Cat Litter Box',
-        images: images.slice(0, 10), // Limit to 10 images
+        images: images.slice(0, 10),
         price: sellPrice,
         costPrice,
         originalPrice,
@@ -68,7 +89,7 @@ function convertCJProduct(cj: CJProduct, markup: number, index: number): ShopPro
         sku: cj.productSku || `CJ-${cj.pid}`,
         inStock: true,
         visible: true,
-        featured: index < 3, // Feature the first 3 products
+        featured: index < 3,
         tags: ['smart-litter-box', 'automatic', 'cat-care', 'cj-import'],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

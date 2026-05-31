@@ -25,6 +25,65 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, data: products });
 }
 
+function getDynamicMarkup(cost: number): number {
+    if (cost < 10) return 3.5;       // Accessories: 3.5x markup (e.g. $3 item -> $10.50)
+    if (cost < 50) return 2.5;       // Medium items: 2.5x markup (e.g. $30 item -> $75.00)
+    if (cost < 150) return 2.2;      // Standard boxes: 2.2x markup (e.g. $117 item -> $257.40)
+    return 1.6;                      // High-end boxes: 1.6x markup (e.g. $426 item -> $681.60)
+}
+
+function processCJImportData(cj: any) {
+    const variantCosts = (cj.variants || []).map((v: any) => v.variantSellPrice);
+    const maxCost = Math.max(...variantCosts, cj.sellPrice || 0);
+    
+    // Primary variant threshold: cheapest variant that is at least 25% of maxCost (or $30) to filter out cheap accessory variants
+    const threshold = maxCost > 50 ? Math.max(30, maxCost * 0.25) : 0;
+    const mainVariants = (cj.variants || []).filter((v: any) => v.variantSellPrice >= threshold);
+    const primaryVariant = mainVariants.length > 0 
+        ? mainVariants.sort((a: any, b: any) => a.variantSellPrice - b.variantSellPrice)[0] 
+        : cj.variants?.[0];
+
+    const costPrice = primaryVariant ? primaryVariant.variantSellPrice : cj.sellPrice;
+    const dynamicMarkup = getDynamicMarkup(costPrice);
+    const sellingPrice = parseFloat((costPrice * dynamicMarkup).toFixed(2));
+
+    const variants = (cj.variants || []).map((v: any) => {
+        const vMarkup = getDynamicMarkup(v.variantSellPrice);
+        return {
+            id: v.vid,
+            name: v.variantNameEn || v.variantName,
+            sku: v.variantSku,
+            price: parseFloat((v.variantSellPrice * vMarkup).toFixed(2)),
+            costPrice: v.variantSellPrice,
+            image: v.variantImage || '',
+            properties: v.variantProperty || '',
+            inStock: true,
+        };
+    });
+
+    return {
+        cjPid: cj.pid,
+        name: cj.productNameEn || cj.productName,
+        description: cj.description || cj.productBrief || '',
+        shortDescription: cj.productBrief || cj.productNameEn || '',
+        category: cj.categoryName || 'Uncategorized',
+        images: cj.productImageSet?.length > 0
+            ? cj.productImageSet
+            : [cj.productImage].filter(Boolean),
+        price: sellingPrice,
+        costPrice,
+        originalPrice: parseFloat((sellingPrice * 1.2).toFixed(2)),
+        currency: 'USD',
+        variants,
+        weight: cj.productWeight,
+        sku: cj.productSku,
+        inStock: true,
+        visible: true,
+        featured: false,
+        tags: [],
+    };
+}
+
 // POST — import product(s) from CJ
 export async function POST(request: NextRequest) {
     if (!checkAuth(request)) {
@@ -33,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        const { cjProduct, cjProducts, customProduct, markup = 1.5 } = body;
+        const { cjProduct, cjProducts, customProduct } = body;
 
         if (customProduct) {
             const newProduct = addShopProduct(customProduct);
@@ -42,40 +101,7 @@ export async function POST(request: NextRequest) {
 
         // Batch import from CJ
         if (cjProducts && Array.isArray(cjProducts)) {
-            const batchProducts = cjProducts.map((cj: any) => {
-                const sellingPrice = parseFloat((cj.sellPrice * markup).toFixed(2));
-                return {
-                    cjPid: cj.pid,
-                    name: cj.productNameEn || cj.productName,
-                    description: cj.description || cj.productBrief || '',
-                    shortDescription: cj.productBrief || cj.productNameEn || '',
-                    category: cj.categoryName || 'Uncategorized',
-                    images: cj.productImageSet?.length > 0
-                        ? cj.productImageSet
-                        : [cj.productImage].filter(Boolean),
-                    price: sellingPrice,
-                    costPrice: cj.sellPrice,
-                    originalPrice: parseFloat((sellingPrice * 1.2).toFixed(2)),
-                    currency: 'USD',
-                    variants: (cj.variants || []).map((v: any) => ({
-                        id: v.vid,
-                        name: v.variantNameEn || v.variantName,
-                        sku: v.variantSku,
-                        price: parseFloat((v.variantSellPrice * markup).toFixed(2)),
-                        costPrice: v.variantSellPrice,
-                        image: v.variantImage || '',
-                        properties: v.variantProperty || '',
-                        inStock: true,
-                    })),
-                    weight: cj.productWeight,
-                    sku: cj.productSku,
-                    inStock: true,
-                    visible: true,
-                    featured: false,
-                    tags: [],
-                };
-            });
-
+            const batchProducts = cjProducts.map((cj: any) => processCJImportData(cj));
             const newProducts = addShopProducts(batchProducts);
             return NextResponse.json({ success: true, data: newProducts, imported: newProducts.length });
         }
@@ -85,38 +111,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid CJ product data or custom product data' }, { status: 400 });
         }
 
-        const sellingPrice = parseFloat((cjProduct.sellPrice * markup).toFixed(2));
-
-        const newProduct = addShopProduct({
-            cjPid: cjProduct.pid,
-            name: cjProduct.productNameEn || cjProduct.productName,
-            description: cjProduct.description || cjProduct.productBrief || '',
-            shortDescription: cjProduct.productBrief || cjProduct.productNameEn || '',
-            category: cjProduct.categoryName || 'Uncategorized',
-            images: cjProduct.productImageSet?.length > 0
-                ? cjProduct.productImageSet
-                : [cjProduct.productImage].filter(Boolean),
-            price: sellingPrice,
-            costPrice: cjProduct.sellPrice,
-            originalPrice: parseFloat((sellingPrice * 1.2).toFixed(2)),
-            currency: 'USD',
-            variants: (cjProduct.variants || []).map((v: any) => ({
-                id: v.vid,
-                name: v.variantNameEn || v.variantName,
-                sku: v.variantSku,
-                price: parseFloat((v.variantSellPrice * markup).toFixed(2)),
-                costPrice: v.variantSellPrice,
-                image: v.variantImage || '',
-                properties: v.variantProperty || '',
-                inStock: true,
-            })),
-            weight: cjProduct.productWeight,
-            sku: cjProduct.productSku,
-            inStock: true,
-            visible: true,
-            featured: false,
-            tags: [],
-        });
+        const productData = processCJImportData(cjProduct);
+        const newProduct = addShopProduct(productData);
 
         return NextResponse.json({ success: true, data: newProduct });
     } catch (error) {

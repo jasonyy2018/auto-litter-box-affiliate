@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const siteConfig = {
   name: 'AutoLitterBox Pro',
   description: 'Expert reviews, comparisons, and buying guides for automatic cat litter boxes. Find the best self-cleaning litter box for your feline friend.',
-  url: 'https://autolitterboxpro.com',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://alit.togomol.com',
   ogImage: '/images/og-image.jpg',
   author: 'AutoLitterBox Pro Team',
   twitterHandle: '@autolitterbox',

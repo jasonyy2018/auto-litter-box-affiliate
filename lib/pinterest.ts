@@ -147,7 +147,7 @@ interface BlogPostMeta {
     image?: string;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://autolitterboxpro.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alit.togomol.com';
 
 /**
  * Generate pin data from a product

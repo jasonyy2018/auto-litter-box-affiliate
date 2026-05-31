@@ -6,7 +6,7 @@ import { Product } from '@/lib/products';
 import BuyButton from './BuyButton';
 import PinterestSaveButton from './PinterestSaveButton';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://autolitterboxpro.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alit.togomol.com';
 
 interface ProductCardProps {
   product: Product;

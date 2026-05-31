@@ -18,6 +18,7 @@ const Footer = () => {
         'Resources': [
             { label: 'Buying Guide', href: '/guides/how-to-choose' },
             { label: 'Is It Worth It?', href: '/blog/is-automatic-litter-box-worth-it' },
+            { label: 'Affiliate Program', href: '/shop/affiliate/dashboard' },
             { label: 'Privacy Policy', href: '/privacy' },
         ],
     };

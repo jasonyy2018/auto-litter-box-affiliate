@@ -18,7 +18,7 @@ export default function AdminAffiliatePage() {
     const [successMsg, setSuccessMsg] = useState('');
 
     function getToken() {
-        return localStorage.getItem('admin_password') || '';
+        return sessionStorage.getItem('admin-auth') || '';
     }
 
     const fetchData = async () => {

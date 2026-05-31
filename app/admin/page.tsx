@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Package, ArrowRight, TrendingUp, Eye, DollarSign } from 'lucide-react';
+import { Package, ArrowRight, TrendingUp, Eye, DollarSign, Users } from 'lucide-react';
 import type { ShopProduct } from '@/lib/shopProducts';
 
 export default function AdminDashboardPage() {
@@ -66,31 +66,45 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <Link
                     href="/admin/products"
-                    className="group bg-white rounded-2xl p-8 border border-[#E5E4E1] hover:shadow-lg hover:border-primary-300 transition-all flex items-center gap-6"
+                    className="group bg-white rounded-2xl p-8 border border-[#E5E4E1] hover:shadow-lg hover:border-primary-300 transition-all flex items-center gap-6 animate-fade-in"
                 >
                     <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors">
                         <Package className="w-7 h-7" />
                     </div>
                     <div className="flex-1">
                         <h3 className="text-lg font-bold text-text-primary group-hover:text-primary-600 transition-colors">Manage Products</h3>
-                        <p className="text-sm text-text-muted">Import, edit, and manage your shop products</p>
+                        <p className="text-sm text-text-muted">Import, edit, and manage products</p>
                     </div>
                     <ArrowRight className="w-5 h-5 text-text-muted group-hover:text-primary-600 group-hover:translate-x-1 transition-all" />
                 </Link>
 
                 <Link
+                    href="/admin/affiliate"
+                    className="group bg-white rounded-2xl p-8 border border-[#E5E4E1] hover:shadow-lg hover:border-indigo-300 transition-all flex items-center gap-6 animate-fade-in"
+                >
+                    <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <Users className="w-7 h-7" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-lg font-bold text-text-primary group-hover:text-indigo-600 transition-colors">Manage Affiliates</h3>
+                        <p className="text-sm text-text-muted">Configure rates & confirm shipping</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-text-muted group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                </Link>
+
+                <Link
                     href="/shop"
-                    className="group bg-white rounded-2xl p-8 border border-[#E5E4E1] hover:shadow-lg hover:border-primary-300 transition-all flex items-center gap-6"
+                    className="group bg-white rounded-2xl p-8 border border-[#E5E4E1] hover:shadow-lg hover:border-green-300 transition-all flex items-center gap-6 animate-fade-in"
                 >
                     <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
                         <Eye className="w-7 h-7" />
                     </div>
                     <div className="flex-1">
                         <h3 className="text-lg font-bold text-text-primary group-hover:text-green-600 transition-colors">View Shop</h3>
-                        <p className="text-sm text-text-muted">Preview your public shop page</p>
+                        <p className="text-sm text-text-muted">Preview public shop page</p>
                     </div>
                     <ArrowRight className="w-5 h-5 text-text-muted group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
                 </Link>

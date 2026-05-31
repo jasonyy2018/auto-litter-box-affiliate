@@ -10,7 +10,7 @@ import { PayPalClient } from '@/lib/paypal';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { orderID } = body;
+        const { orderID, referredBy, items, subtotal } = body;
 
         if (!orderID) {
             return NextResponse.json(
@@ -63,6 +63,16 @@ export async function POST(request: NextRequest) {
             } catch {
                 // Order may not exist in our DB yet — that's okay for direct checkout
                 console.log('No matching order found for PayPal order:', orderID);
+            }
+
+            // Register referred order in the affiliate system
+            if (referredBy && items && items.length > 0) {
+                try {
+                    const { addReferredOrder } = require('@/lib/affiliateSystem');
+                    addReferredOrder(orderID, referredBy, subtotal, items);
+                } catch (affiliateErr) {
+                    console.error('Failed to log referred order to affiliate system:', affiliateErr);
+                }
             }
 
             return NextResponse.json({

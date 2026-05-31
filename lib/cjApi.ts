@@ -388,3 +388,63 @@ export async function getCategories(): Promise<unknown[]> {
 
     return data.data;
 }
+
+export interface CJFreightProduct {
+    quantity: number;
+    vid: string;
+}
+
+export interface CJFreightRequest {
+    startCountryCode?: string;
+    endCountryCode: string;
+    zip?: string;
+    products: CJFreightProduct[];
+}
+
+export interface CJFreightResponse {
+    logisticName: string;
+    freightPrice: number;
+    shippingTime: string;
+}
+
+/**
+ * Calculate dynamic shipping freight using CJ Dropshipping API
+ */
+export async function calculateFreight(req: CJFreightRequest): Promise<CJFreightResponse[]> {
+    const token = await getAccessToken();
+
+    const body = {
+        startCountryCode: req.startCountryCode || 'CN',
+        endCountryCode: req.endCountryCode,
+        zip: req.zip,
+        products: req.products,
+    };
+
+    const response = await httpsFetch(`${CJ_BASE_URL}/logistic/freightCalculate`, {
+        method: 'POST',
+        headers: {
+            'CJ-Access-Token': token,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        throw new Error(`CJ Freight Calculation failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data: CJApiResponse<any> = await response.json();
+
+    if (!data.result) {
+        throw new Error(`CJ Freight Calculation error: ${data.message}`);
+    }
+
+    // Normalizing the freight results
+    const list = data.data || [];
+    return list.map((item: any) => ({
+        logisticName: item.logisticName || item.name || 'Standard Shipping',
+        freightPrice: typeof item.freightPrice === 'number' ? item.freightPrice : parseFloat(item.freightPrice || '0'),
+        shippingTime: item.shippingTime || '7-15 days',
+    }));
+}
+

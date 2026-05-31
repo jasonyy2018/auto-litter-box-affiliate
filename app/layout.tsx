@@ -6,6 +6,7 @@ import AuthProvider from '@/components/AuthProvider';
 import CartDrawer from '@/components/CartDrawer';
 import { CartProvider } from '@/lib/CartContext';
 import { siteConfig } from '@/lib/seo';
+import AffiliateTracker from '@/components/AffiliateTracker';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -92,6 +93,7 @@ export default function RootLayout({
       <body className={`${outfit.variable} min-h-screen flex flex-col font-sans antialiased text-text-primary bg-white`} suppressHydrationWarning>
         <AuthProvider>
           <CartProvider>
+            <AffiliateTracker />
             <LayoutWrapper>
               {children}
             </LayoutWrapper>

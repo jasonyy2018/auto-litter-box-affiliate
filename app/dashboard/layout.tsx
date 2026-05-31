@@ -25,9 +25,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
                                 <p className="text-sm text-text-muted truncate">{session.user?.email}</p>
                             </div>
                             <nav className="p-4 flex flex-col gap-2">
-                                <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 bg-primary-50 text-primary-600 rounded-xl font-semibold transition-colors">
+                                <Link href="/shop/account/orders" className="flex items-center gap-3 px-4 py-3 text-text-secondary hover:bg-gray-50 hover:text-primary-600 rounded-xl font-medium transition-colors">
                                     <ShoppingBag className="w-5 h-5" />
                                     My Orders
+                                </Link>
+                                <Link href="/shop/affiliate/dashboard" className="flex items-center gap-3 px-4 py-3 text-text-secondary hover:bg-gray-50 hover:text-primary-600 rounded-xl font-medium transition-colors">
+                                    <User className="w-5 h-5" />
+                                    Affiliate Portal
                                 </Link>
                                 <Link href="#" className="flex items-center gap-3 px-4 py-3 text-text-secondary hover:bg-gray-50 hover:text-primary-600 rounded-xl font-medium transition-colors">
                                     <Settings className="w-5 h-5" />

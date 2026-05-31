@@ -48,7 +48,7 @@ function httpsFetch(url: string, options: any = {}): Promise<any> {
         });
 
         req.on('error', reject);
-        req.setTimeout(60000, () => { // 60s timeout for slow GFW connections
+        req.setTimeout(8000, () => { // 8s timeout to avoid serverless gateway 504 execution limit kills
              req.destroy();
              reject(new Error('CJ API Proxy/Timeout Error'));
         });
@@ -447,4 +447,120 @@ export async function calculateFreight(req: CJFreightRequest): Promise<CJFreight
         shippingTime: item.shippingTime || '7-15 days',
     }));
 }
+
+export interface CJOrderProduct {
+    vid: string;
+    quantity: number;
+}
+
+export interface CJOrderRequest {
+    orderNumber: string;
+    shippingCustomerName: string;
+    shippingCountry: string;
+    shippingState: string;
+    shippingCity: string;
+    shippingAddress: string;
+    shippingZip: string;
+    shippingPhone: string;
+    products: CJOrderProduct[];
+}
+
+/**
+ * Automate Sourcing: Place a draft dropshipping order directly on CJDropshipping
+ */
+export async function createCJOrder(req: CJOrderRequest): Promise<{ cjOrderId: string; status: string }> {
+    const token = await getAccessToken();
+
+    const body = {
+        orderNumber: req.orderNumber,
+        shippingCustomerName: req.shippingCustomerName,
+        shippingCountry: req.shippingCountry || 'US',
+        shippingState: req.shippingState,
+        shippingCity: req.shippingCity,
+        shippingAddress: req.shippingAddress,
+        shippingZip: req.shippingZip,
+        shippingPhone: req.shippingPhone || '1234567890',
+        products: req.products,
+    };
+
+    const response = await httpsFetch(`${CJ_BASE_URL}/order/createV2`, {
+        method: 'POST',
+        headers: {
+            'CJ-Access-Token': token,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+        throw new Error(`CJ Order Creation failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data: CJApiResponse<any> = await response.json();
+
+    if (!data.result) {
+        throw new Error(`CJ Order Creation error: ${data.message}`);
+    }
+
+    return {
+        cjOrderId: data.data?.cjOrderId || data.data?.id || 'CJ-DRAFT-' + Date.now(),
+        status: data.data?.status || 'Draft'
+    };
+}
+
+/**
+ * Query live tracking details from CJDropshipping
+ */
+export async function getCJTracking(orderNumber: string): Promise<{
+    trackingNumber: string | null;
+    carrier: string | null;
+    status: 'pending' | 'processing' | 'shipped' | 'delivered';
+    trackingLogs: Array<{ time: string; event: string }>;
+}> {
+    try {
+        const token = await getAccessToken();
+
+        const response = await httpsFetch(`${CJ_BASE_URL}/order/getTrackingNumber?orderNumber=${orderNumber}`, {
+            method: 'GET',
+            headers: {
+                'CJ-Access-Token': token,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            return { trackingNumber: null, carrier: null, status: 'pending', trackingLogs: [] };
+        }
+
+        const data: CJApiResponse<any> = await response.json();
+
+        if (!data.result || !data.data) {
+            return { trackingNumber: null, carrier: null, status: 'pending', trackingLogs: [] };
+        }
+
+        const shipData = data.data;
+        const trackingNumber = shipData.trackingNumber || shipData.trackNumber || null;
+        const carrier = shipData.logisticName || shipData.carrier || null;
+        
+        let status: 'pending' | 'processing' | 'shipped' | 'delivered' = 'processing';
+        if (trackingNumber) status = 'shipped';
+        if (shipData.delivered || shipData.status === 'Delivered') status = 'delivered';
+
+        const rawLogs = shipData.trackingLogs || shipData.logs || [];
+        const trackingLogs = rawLogs.map((l: any) => ({
+            time: l.time || l.date || '',
+            event: l.event || l.remark || 'Status Update'
+        }));
+
+        return {
+            trackingNumber,
+            carrier,
+            status,
+            trackingLogs
+        };
+    } catch {
+        return { trackingNumber: null, carrier: null, status: 'processing', trackingLogs: [] };
+    }
+}
+
 

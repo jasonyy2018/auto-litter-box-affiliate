@@ -110,9 +110,16 @@ export async function POST(request: NextRequest) {
 
         const now = new Date().toISOString();
 
-        // Run CJ API checks in parallel (5 at a time) — no per-request sleep
-        const tasks = productsToSync.map(product => async (): Promise<SyncResult> => {
+        // Helper sleep function to prevent CJDropshipping API burst frequency limit errors
+        const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        // Run CJ API checks with frequency protection (sequential check with a 350ms delay between calls)
+        const tasks = productsToSync.map((product, index) => async (): Promise<SyncResult> => {
             try {
+                // Stagger starting times sequentially to protect the API gateway limit
+                if (index > 0) {
+                    await sleep(index * 350);
+                }
                 const statusResult = await checkProductStatus(product.cjPid);
                 const previousStatus = product.cjStatus || 'unknown';
 
@@ -150,7 +157,8 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        const rawResults = await pLimit(tasks, 5);
+        // Use low concurrency (2 tasks in flight) to keep server loads balanced while applying our sequential delay
+        const rawResults = await pLimit(tasks, 2);
 
         // Single bulk write — one read + one write for all products
         const bulkUpdates: Record<string, Record<string, any>> = {};

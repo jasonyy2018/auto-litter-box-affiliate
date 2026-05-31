@@ -10,7 +10,7 @@ import { PayPalClient } from '@/lib/paypal';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { orderID, referredBy, items, subtotal } = body;
+        const { orderID, referredBy, items, subtotal, shippingAddress } = body;
 
         if (!orderID) {
             return NextResponse.json(
@@ -72,6 +72,75 @@ export async function POST(request: NextRequest) {
                     addReferredOrder(orderID, referredBy, subtotal, items);
                 } catch (affiliateErr) {
                     console.error('Failed to log referred order to affiliate system:', affiliateErr);
+                }
+            }
+
+            // Auto place order on CJDropshipping
+            if (items && items.length > 0 && shippingAddress && process.env.CJ_API_KEY) {
+                try {
+                    const { createCJOrder, getProductDetail } = require('@/lib/cjApi');
+                    const { getShopProductById } = require('@/lib/shopProducts');
+                    
+                    const cjProducts = [];
+                    for (const item of items) {
+                        const product = getShopProductById(item.productId);
+                        if (product && product.cjPid) {
+                            let vid = '';
+                            if (item.variantId && item.variantId !== 'cj-var-default') {
+                                vid = item.variantId.startsWith('cj-var-') ? item.variantId.replace('cj-var-', '') : item.variantId;
+                            }
+                            
+                            if (!vid || vid === 'default' || vid === 'cj-var-default') {
+                                // Fetch real variant from CJ details
+                                const detail = await getProductDetail(product.cjPid);
+                                if (detail?.variants?.length > 0) {
+                                    vid = detail.variants[0].vid;
+                                }
+                            }
+                            
+                            if (vid) {
+                                cjProducts.push({
+                                    vid,
+                                    quantity: item.quantity
+                                });
+                            }
+                        }
+                    }
+                    
+                    if (cjProducts.length > 0) {
+                        const cjResult = await createCJOrder({
+                            orderNumber: orderID,
+                            shippingCustomerName: shippingAddress.fullName,
+                            shippingCountry: 'US',
+                            shippingState: shippingAddress.state,
+                            shippingCity: shippingAddress.city,
+                            shippingAddress: shippingAddress.streetAddress,
+                            shippingZip: shippingAddress.zip,
+                            shippingPhone: shippingAddress.phone || '1234567890',
+                            products: cjProducts
+                        });
+                        console.log('Successfully placed auto-dropship order on CJ:', cjResult);
+                        
+                        // Save the CJ Order ID to PostgreSQL
+                        const existingOrder = await prisma.order.findUnique({
+                            where: { paypalOrderId: orderID },
+                        });
+                        
+                        if (existingOrder) {
+                            await prisma.order.update({
+                                where: { paypalOrderId: orderID },
+                                data: {
+                                    shippingAddress: {
+                                        ...(existingOrder.shippingAddress as any || {}),
+                                        cjOrderId: cjResult.cjOrderId,
+                                        cjStatus: cjResult.status
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } catch (cjErr) {
+                    console.error('Failed to auto place dropshipping order on CJ:', cjErr);
                 }
             }
 

@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { getAllUnifiedBlogs } from '@/lib/blogDb';
 import { ArrowRight, Calendar, Clock, User } from 'lucide-react';
+import { generateMetadata as generateSeoMetadata } from '@/lib/seo';
 
-export const metadata = {
-    title: 'Blog - AutoLitter Expert Insights',
-    description: 'Latest guides, reviews, and tips for automatic litter box owners.',
-};
+export const metadata = generateSeoMetadata({
+    title: 'Blog - Expert Litter Box Insights & Guides',
+    description: 'Latest guides, reviews, and tips for automatic litter box owners. Learn about the best products and cat care advice.',
+    path: '/blog',
+});
 
 export default async function BlogIndexPage() {
     const posts = await getAllUnifiedBlogs();

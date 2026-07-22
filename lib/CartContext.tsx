@@ -2,6 +2,10 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 
+declare global {
+  var _paq: any[] | undefined;
+}
+
 export interface CartItem {
     id: string;
     slug: string;
@@ -89,6 +93,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
             return [...prev, { ...item, quantity }];
         });
         setIsOpen(true);
+
+        // Track in Matomo
+        if (typeof window !== 'undefined' && typeof _paq !== 'undefined') {
+            _paq.push(['trackEvent', 'Cart', 'Add', item.name, quantity, item.price * quantity]);
+        }
     }, []);
 
     const removeFromCart = useCallback((id: string, variantId?: string) => {

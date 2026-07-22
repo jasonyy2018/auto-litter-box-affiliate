@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShoppingCart, AlertTriangle } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import type { ShopProduct } from '@/lib/shopProducts';
@@ -61,12 +62,14 @@ export default function ShopProductCard({ product }: ShopProductCardProps) {
                         </div>
                     )}
                     {product.images[0] ? (
-                        <img
+                        <Image
                             src={product.images[0]}
                             alt={product.name}
-                            className={`w-full h-full object-contain transition-transform duration-500 ${
+                            fill
+                            className={`object-contain transition-transform duration-500 ${
                                 isDiscontinued ? 'grayscale' : 'group-hover:scale-110'
                             }`}
+                            sizes="(max-width: 768px) 100vw, 33vw"
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-text-muted">

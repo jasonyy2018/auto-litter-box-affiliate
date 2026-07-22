@@ -1,0 +1,152 @@
+[
+  {
+    "id": "litter-robot-4",
+    "slug": "litter-robot-4",
+    "name": "Litter-Robot 4",
+    "brand": "Whisker",
+    "tagline": "The ultimate self-cleaning litter box — premium build, whisper-quiet, and app-connected.",
+    "description": "The Litter-Robot 4 is the gold standard in automatic litter boxes. With OmniSense detection, whisper-quiet operation under 50 dB, and comprehensive health tracking via the Whisker app, it delivers the best hands-free experience for multi-cat households.",
+    "price": 699,
+    "originalPrice": 749,
+    "rating": 4.8,
+    "reviewCount": 2847,
+    "image": "https://images.unsplash.com/photo-1585692181606-4e3c8d7b5c3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+    "images": [
+      "https://images.unsplash.com/photo-1585692181606-4e3c8d7b5c3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0BK2MTW2Q?tag=jyu0e-20",
+    "amazonUrl": "https://www.amazon.com/dp/B0BK2MTW2Q?tag=jyu0e-20",
+    "features": [
+      "OmniSense detection with laser & weight sensors",
+      "Whisper-quiet operation under 50 dB",
+      "Health tracking via Whisker app",
+      "Supports up to 4 cats (25 lbs each)",
+      "90-day money-back guarantee"
+    ],
+    "pros": [
+      "Best-in-class odor control with sealed waste drawer",
+      "Very quiet operation — suitable for bedrooms",
+      "Excellent app with health insights and weight tracking",
+      "Premium build quality with sleek design",
+      "Accommodates large cats up to 25 lbs"
+    ],
+    "cons": [
+      "Highest price point at $699",
+      "Large footprint requires dedicated space",
+      "Proprietary waste bags recommended for best fit"
+    ],
+    "specs": {
+      "dimensions": "22\" W x 27\" D x 30\" H",
+      "weight": "24 lbs",
+      "capacity": "Up to 4 cats",
+      "litterType": "Clumping clay",
+      "cleaningCycle": "7 minutes",
+      "noiseLevel": "< 50 dB",
+      "warranty": "1 year (3 years extended available)",
+      "connectivity": "WiFi + Bluetooth"
+    },
+    "badge": "Best Overall",
+    "rank": 1,
+    "lastUpdated": "2026-07-21"
+  },
+  {
+    "id": "petkit-pura-max",
+    "slug": "petkit-pura-max",
+    "name": "PETKIT Pura Max",
+    "brand": "PETKIT",
+    "tagline": "Best value automatic litter box with xSecure safety and built-in deodorizer.",
+    "description": "The PETKIT Pura Max offers an impressive array of features at a more accessible price. Its xSecure 5-point safety system, N50 active deodorizer, and spacious interior make it a top choice for smart cat owners.",
+    "price": 549,
+    "originalPrice": 599,
+    "rating": 4.6,
+    "reviewCount": 1893,
+    "image": "https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+    "images": [
+      "https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B09QKGZZ2K?tag=jyu0e-20",
+    "amazonUrl": "https://www.amazon.com/dp/B09QKGZZ2K?tag=jyu0e-20",
+    "features": [
+      "xSecure 5-point safety detection system",
+      "N50 active deodorizer spray technology",
+      "Extra-large cylinder interior (cats up to 18 lbs)",
+      "Smart app with usage stats & cycle customization",
+      "Modern aesthetic design"
+    ],
+    "pros": [
+      "Excellent value at $549 vs $699 competitors",
+      "Very spacious interior for larger cats",
+      "Multiple safety sensors for peace of mind",
+      "Built-in deodorizer neutralizes odors actively",
+      "Modern design blends with home decor"
+    ],
+    "cons": [
+      "App can be occasionally buggy",
+      "Deodorizer refills add ongoing cost",
+      "Slightly louder than the Litter-Robot 4"
+    ],
+    "specs": {
+      "dimensions": "20.5\" W x 24\" D x 25.5\" H",
+      "weight": "22 lbs",
+      "capacity": "Up to 3 cats",
+      "litterType": "Clumping litter",
+      "cleaningCycle": "5 minutes",
+      "noiseLevel": "< 55 dB",
+      "warranty": "1 year",
+      "connectivity": "WiFi"
+    },
+    "badge": "Best Value",
+    "rank": 2,
+    "lastUpdated": "2026-07-21"
+  },
+  {
+    "id": "catlink-scooper",
+    "slug": "catlink-scooper",
+    "name": "CatLink Scooper Standard Pro",
+    "brand": "CatLink",
+    "tagline": "Reliable budget-friendly automatic litter box with smart health monitoring.",
+    "description": "The CatLink Scooper Standard Pro proves you don't need to spend $600+ for a reliable automatic litter box. It delivers solid performance, double odor control, and health tracking at the best price in its category.",
+    "price": 399,
+    "originalPrice": 449,
+    "rating": 4.4,
+    "reviewCount": 1256,
+    "image": "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+    "images": [
+      "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B08YNZQM2K?tag=jyu0e-20",
+    "amazonUrl": "https://www.amazon.com/dp/B08YNZQM2K?tag=jyu0e-20",
+    "features": [
+      "Double odor control with carbon filter + sealed design",
+      "Smart weight monitoring for health tracking",
+      "Easy-clean slide-out waste drawer",
+      "Compact design for smaller spaces",
+      "Affordable entry into automatic litter boxes"
+    ],
+    "pros": [
+      "Best budget-friendly option at $399",
+      "Simple setup and operation",
+      "Reliable performance with minimal errors",
+      "Compact design fits in tighter spaces",
+      "Good app features for the price"
+    ],
+    "cons": [
+      "Smaller waste drawer capacity",
+      "Not ideal for very large cats (over 15 lbs)",
+      "Fewer premium features than competitors"
+    ],
+    "specs": {
+      "dimensions": "19\" W x 22\" D x 24\" H",
+      "weight": "18 lbs",
+      "capacity": "Up to 2 cats",
+      "litterType": "Clumping litter",
+      "cleaningCycle": "6 minutes",
+      "noiseLevel": "< 52 dB",
+      "warranty": "1 year",
+      "connectivity": "WiFi"
+    },
+    "badge": "Budget Pick",
+    "rank": 3,
+    "lastUpdated": "2026-07-21"
+  }
+]

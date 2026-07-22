@@ -1,6 +1,7 @@
 'use client';
 
 import { CheckCircle2, MinusCircle, Star } from 'lucide-react';
+import Image from 'next/image';
 import { Product } from '@/lib/products';
 import BuyButton from './BuyButton';
 
@@ -22,7 +23,7 @@ export default function ComparisonTable({ products, showBuyButton = true }: Comp
               {products.map((product) => (
                 <th key={product.id} className="px-8 py-6 text-center">
                    <div className="flex flex-col items-center gap-3">
-                      <img src={product.image} alt={product.name} className="w-16 h-16 object-contain" />
+                      <Image src={product.image} alt={product.name} width={64} height={64} className="w-16 h-16 object-contain" />
                       <span className="text-sm font-bold text-[#1A1918]">{product.name}</span>
                    </div>
                 </th>

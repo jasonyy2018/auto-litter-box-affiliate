@@ -7,6 +7,7 @@ import CartDrawer from '@/components/CartDrawer';
 import { CartProvider } from '@/lib/CartContext';
 import { siteConfig } from '@/lib/seo';
 import AffiliateTracker from '@/components/AffiliateTracker';
+import SocialProofToast from '@/components/SocialProofToast';
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -94,6 +95,7 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <AffiliateTracker />
+            <SocialProofToast />
             <LayoutWrapper>
               {children}
             </LayoutWrapper>

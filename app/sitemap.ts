@@ -1,10 +1,18 @@
 import { MetadataRoute } from 'next';
 import { getAllProducts } from '@/lib/products';
 import { siteConfig } from '@/lib/seo';
+import { getAllUnifiedBlogs } from '@/lib/blogDb';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const products = getAllProducts();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url;
+
+  // Fetch dynamic blog posts
+  let blogPosts: { slug: string }[] = [];
+  try {
+    blogPosts = await getAllUnifiedBlogs();
+  } catch {
+    blogPosts = [];
+  }
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -32,9 +40,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 0.7,
     },
+    {
+      url: `${baseUrl}/shop`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/guides/how-to-choose`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/guides/automatic-vs-traditional`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
   ];
 
   // Product review pages
+  const products = getAllProducts();
   const productPages: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${baseUrl}/reviews/${product.slug}`,
     lastModified: new Date(product.lastUpdated),
@@ -58,43 +91,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Guide pages
-  const guidePages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/guides/how-to-choose`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/guides/automatic-vs-traditional`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-  ];
-
-  // Blog pages
-  const blogPages: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/blog/how-often-clean-litter`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/blog/is-automatic-litter-box-worth-it`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-  ];
+  // Blog pages from database or static fallback
+  const blogPageList: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
 
   return [
     ...staticPages,
     ...productPages,
     ...comparisonPages,
-    ...guidePages,
-    ...blogPages,
+    ...blogPageList,
   ];
 }

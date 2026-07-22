@@ -58,6 +58,11 @@ export function trackAffiliateClick(link: AffiliateLink): void {
       });
     }
 
+    // Matomo tracking
+    if (typeof _paq !== 'undefined') {
+      _paq.push(['trackEvent', 'Affiliate', 'Click', link.productName]);
+    }
+
     // Console log for development
     console.log('Affiliate click tracked:', {
       product: link.productName,
@@ -118,7 +123,8 @@ export function getAllAffiliateLinks(productSlug: string) {
   return productAffiliateLinks[productSlug] || {};
 }
 
-// Declare gtag for TypeScript
+// Declare gtag and _paq for TypeScript
 declare global {
+  var _paq: any[] | undefined;
   function gtag(...args: any[]): void;
 }

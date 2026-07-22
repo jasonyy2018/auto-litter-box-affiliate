@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { Package, ExternalLink } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -80,7 +81,7 @@ export default async function DashboardPage() {
                                     <div key={item.id} className="flex gap-4 items-center">
                                         {item.image && (
                                             <div className="w-16 h-16 bg-surface-bg rounded-lg shrink-0 overflow-hidden">
-                                                <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2" />
+                                                <Image src={item.image} alt={item.name} width={64} height={64} className="w-full h-full object-contain p-2" />
                                             </div>
                                         )}
                                         <div className="flex-1">

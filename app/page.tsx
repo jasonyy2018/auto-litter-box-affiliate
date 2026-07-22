@@ -1,11 +1,12 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, ArrowDown, Sparkles, Timer, Box, Award, CheckCircle2, Plus } from 'lucide-react';
+import { ArrowRight, Sparkles, Timer, Box, Award, CheckCircle2, Star } from 'lucide-react';
 import { getAllProducts } from '@/lib/products';
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo';
 import ProductCard from '@/components/ProductCard';
 import ComparisonTable from '@/components/ComparisonTable';
 import FAQ from '@/components/FAQ';
+import Breadcrumb from '@/components/Breadcrumb';
 
 export const metadata: Metadata = generateSeoMetadata({
   title: 'Best Automatic Litter Boxes 2026 - Expert Reviews & Comparisons',
@@ -91,14 +92,15 @@ export default function HomePage() {
 
           {/* Right Image */}
           <div className="relative animate-fade-in-up delay-400">
-            <div className="relative aspect-4/3 rounded-[40px] overflow-hidden shadow-2xl border-8 border-white">
-              <video
-                src="/videos/smart-litter-box-demo.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
+            <div className="relative aspect-4/3 rounded-[40px] overflow-hidden shadow-2xl border-8 border-white bg-surface-bg">
+              <img
+                src="https://images.unsplash.com/photo-1585692181606-4e3c8d7b5c3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+                alt="Automatic self-cleaning litter box for cats"
+                width={600}
+                height={450}
                 className="w-full h-full object-cover"
+                loading="eager"
+                fetchPriority="high"
               />
             </div>
           </div>
@@ -171,26 +173,49 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="py-24 px-8 lg:px-20">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-20">
-            <div className="text-[11px] font-bold text-primary-600 tracking-[4px] uppercase mb-4">Help Center</div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-text-primary mb-4">Frequently Asked Questions</h2>
+      {/* Testimonials Section */}
+      <section className="py-24 px-6 lg:px-20 bg-white">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-block px-4 py-1.5 bg-[#C8F0D8] rounded-full mb-6 shadow-sm">
+              <span className="text-[11px] font-bold text-primary-600 tracking-[2px] uppercase">Customer Stories</span>
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-bold text-text-primary mb-4">What Cat Owners Are Saying</h2>
+            <p className="text-text-secondary text-lg max-w-2xl mx-auto font-medium">Join thousands of happy cat owners who've made the switch.</p>
           </div>
 
-          <div className="space-y-4">
-            {faqs.map((faq, i) => (
-              <div key={i} className="bg-white border border-[#E5E4E1] rounded-[24px] overflow-hidden group transition-all hover:border-primary-600">
-                <div className="px-10 py-8 flex justify-between items-center cursor-pointer">
-                  <h4 className="text-xl font-bold text-text-primary group-hover:text-primary-600 transition-colors">{faq.question}</h4>
-                  <div className="w-10 h-10 rounded-full bg-surface-bg flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all">
-                    <Plus className="w-6 h-6 transition-transform group-hover:rotate-90" />
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { name: 'Sarah M.', location: 'Austin, TX', text: 'The Litter-Robot 4 has been a game-changer. My two Maine Coons use it daily and the odor control is incredible.', rating: 5 },
+              { name: 'Mike D.', location: 'Portland, OR', text: 'Switched from manual scooping and never looking back. The app notifications are so convenient.', rating: 5 },
+              { name: 'Emily R.', location: 'Chicago, IL', text: 'Best purchase for our multi-cat household. No more litter tracking issues!', rating: 4 },
+            ].map((testimonial, i) => (
+              <div key={i} className="bg-surface-bg p-8 rounded-[24px] border border-[#E5E4E1] hover:shadow-lg transition-all">
+                <div className="flex text-yellow-400 mb-4">
+                  {[...Array(5)].map((_, idx) => (
+                    <Star key={idx} className={`w-5 h-5 ${idx < testimonial.rating ? 'fill-current' : 'text-gray-300'}`} />
+                  ))}
+                </div>
+                <p className="text-text-secondary leading-relaxed mb-6 font-medium">"{testimonial.text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {testimonial.name[0]}
+                  </div>
+                  <div>
+                    <p className="font-bold text-text-primary">{testimonial.name}</p>
+                    <p className="text-xs text-text-muted">{testimonial.location}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-24 px-8 lg:px-20">
+        <div className="max-w-4xl mx-auto">
+          <FAQ items={faqs} title="Frequently Asked Questions" />
         </div>
       </section>
     </div>

@@ -6,6 +6,7 @@ import {
     ChevronLeft, ChevronRight, Star, Loader2, Check, RefreshCw,
     AlertTriangle, CheckCircle, HelpCircle, Clock
 } from 'lucide-react';
+import Image from 'next/image';
 import type { ShopProduct } from '@/lib/shopProducts';
 
 interface CJProductResult {

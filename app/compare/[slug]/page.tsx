@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, CheckCircle2, XCircle, Scale, ShieldCheck } from 'lucide-react';
 import { compareProducts, getProductBySlug } from '@/lib/products';
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo';
@@ -78,7 +79,7 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
                     {p.badge || 'Contender'}
                  </div>
                  <div className="w-full aspect-square max-w-[240px] bg-white/10 rounded-full p-8 mb-8 backdrop-blur-sm">
-                    <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                    <Image src={p.image} alt={p.name} width={240} height={240} className="object-contain" />
                  </div>
                  <h2 className="text-3xl font-bold mb-2">{p.name}</h2>
                  <div className={`text-2xl font-bold mb-8 ${p.id === product1.id ? 'text-white' : 'text-[#3D8A5A]'}`}>${p.price}</div>

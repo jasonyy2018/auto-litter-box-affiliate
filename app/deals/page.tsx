@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Tag, Clock, Percent, ExternalLink } from 'lucide-react';
+import Image from 'next/image';
 import { getAllProducts, Product } from '@/lib/products';
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo';
 import { affiliateDisclosure } from '@/lib/affiliate';
@@ -8,7 +9,7 @@ import BuyButton from '@/components/BuyButton';
 import Rating from '@/components/Rating';
 
 export const metadata: Metadata = generateSeoMetadata({
-  title: 'Automatic Litter Box Deals & Coupons 2024',
+  title: 'Automatic Litter Box Deals & Coupons 2026',
   description: 'Find the best deals, discounts, and coupon codes for automatic litter boxes. Save on Litter-Robot, PETKIT, CatLink and more.',
   path: '/deals',
 });
@@ -29,7 +30,7 @@ const currentDeals: Deal[] = [
     title: '$50 Off Litter-Robot 4',
     description: 'Save $50 on the Litter-Robot 4 with free shipping. Limited time offer!',
     discount: '$50 OFF',
-    expires: 'Jan 31, 2024',
+    expires: 'Aug 15, 2026',
     verified: true,
   },
   {
@@ -38,7 +39,7 @@ const currentDeals: Deal[] = [
     description: 'Get $50 off the PETKIT Pura Max plus free deodorizer refills.',
     discount: '$50 OFF',
     code: 'PETKIT50',
-    expires: 'Feb 15, 2024',
+    expires: 'Sep 1, 2026',
     verified: true,
   },
   {
@@ -58,9 +59,11 @@ function DealCard({ deal, product }: { deal: Deal; product: Product }) {
         {/* Product Image */}
         <div className="md:w-1/4 flex-shrink-0">
           <Link href={`/reviews/${product.slug}`}>
-            <img
+            <Image
               src={product.image}
               alt={product.name}
+              width={160}
+              height={160}
               className="w-full h-40 object-contain bg-white rounded-lg"
             />
           </Link>
@@ -176,9 +179,11 @@ export default function DealsPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {products.map((product) => (
               <div key={product.id} className="card p-6 text-center">
-                <img
+                <Image
                   src={product.image}
                   alt={product.name}
+                  width={96}
+                  height={96}
                   className="w-24 h-24 object-contain mx-auto mb-4"
                 />
                 <h3 className="font-bold text-gray-900">{product.name}</h3>

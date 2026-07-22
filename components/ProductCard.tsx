@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Star, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import { Product } from '@/lib/products';
 import BuyButton from './BuyButton';
 import PinterestSaveButton from './PinterestSaveButton';
@@ -46,10 +47,13 @@ export default function ProductCard({ product, rank, variant = 'vertical' }: Pro
               description={`${product.name} - ${product.tagline} | $${product.price}`}
             />
           </div>
-          <img
+          <Image
             src={product.image}
             alt={product.name}
+            width={400}
+            height={350}
             className="w-full h-auto max-h-[350px] object-contain group-hover:scale-105 transition-transform duration-700"
+            sizes="(max-width: 768px) 100vw, 400px"
           />
         </div>
 
@@ -116,10 +120,12 @@ export default function ProductCard({ product, rank, variant = 'vertical' }: Pro
             description={`${product.name} - ${product.tagline} | $${product.price}`}
           />
         </div>
-        <img
+        <Image
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+          fill
+          className="object-contain group-hover:scale-105 transition-transform duration-700"
+          sizes="(max-width: 768px) 100vw, 33vw"
         />
       </div>
 

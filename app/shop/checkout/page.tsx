@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '@/lib/CartContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import { Shield, Lock, Truck, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import Link from 'next/link';
 
 export default function CheckoutPage() {
     const { items, subtotal, clearCart, itemCount } = useCart();
@@ -217,7 +218,7 @@ export default function CheckoutPage() {
                                     <div key={`${item.id}-${item.variantId || ''}`} className="flex justify-between items-center text-sm">
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 rounded-lg overflow-hidden bg-white shrink-0 border border-[#E5E4E1]">
-                                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                                <Image src={item.image} alt={item.name} width={48} height={48} className="w-full h-full object-cover" />
                                             </div>
                                             <div>
                                                 <p className="font-bold text-text-primary line-clamp-1">{item.name}</p>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Package, Truck, Calendar, ShoppingBag, ChevronRight, Clipboard, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function CustomerOrdersPage() {
@@ -129,7 +130,7 @@ export default function CustomerOrdersPage() {
                                             <div className="flex items-center gap-2.5 bg-surface-bg/50 px-3 py-2 rounded-xl border border-gray-50/50">
                                                 <div className="w-10 h-10 bg-white rounded-lg border border-gray-100 overflow-hidden flex items-center justify-center shrink-0">
                                                     {order.items?.[0]?.image ? (
-                                                        <img src={order.items[0].image} alt={order.items[0].name} className="w-full h-full object-contain p-1" />
+                                                        <Image src={order.items[0].image} alt={order.items[0].name} width={40} height={40} className="w-full h-full object-contain p-1" />
                                                     ) : (
                                                         <Package className="w-5 h-5 text-text-secondary" />
                                                     )}

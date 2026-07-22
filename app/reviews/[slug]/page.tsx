@@ -2,11 +2,13 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Star, ShieldCheck, CheckCircle2, XCircle, Clock, Smartphone, Zap, Sparkles, Award, Box, Info, Plus } from 'lucide-react';
+import Image from 'next/image';
 import { getProductBySlug, getAllProducts, getRelatedProducts } from '@/lib/products';
-import { generateMetadata as generateSeoMetadata, generateProductSchema } from '@/lib/seo';
+import { generateMetadata as generateSeoMetadata, generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo';
 import Rating from '@/components/Rating';
 import BuyButton from '@/components/BuyButton';
 import FAQ from '@/components/FAQ';
+import Breadcrumb from '@/components/Breadcrumb';
 
 export async function generateStaticParams() {
   const products = getAllProducts();
@@ -57,6 +59,13 @@ export default async function ReviewPage({ params }: { params: Promise<{ slug: s
     },
   ];
 
+  // Generate breadcrumb schema for SEO
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Top Picks', url: '/best' },
+    { name: `${product.name} Review`, url: `/reviews/${product.slug}` },
+  ]);
+
   return (
     <div className="bg-[#F5F4F1] min-h-screen font-sans">
       {/* Schema Scripts */}
@@ -64,12 +73,20 @@ export default async function ReviewPage({ params }: { params: Promise<{ slug: s
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
 
       {/* Hero Section */}
       <section className="bg-white py-[80px] px-6 lg:px-20 border-b border-[#E5E4E1] animate-fade-in relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-[80px]">
           <div className="flex-1">
-            <Link href="/best" className="inline-flex items-center gap-2 text-[14px] font-bold text-[#9C9B99] hover:text-[#3D8A5A] transition-colors mb-10 group lowercase tracking-wider">
+            <Link href="/best" className="inline-flex items-center gap-2 text-[14px] font-bold text-[#9C9B99] hover:text-[#3D8A5A] transition-colors mb-6">
+              <Breadcrumb items={[
+                { label: 'Home', href: '/' },
+                { label: 'Top Picks', href: '/best' },
+              ]} />
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
               back to top picks
             </Link>
@@ -121,7 +138,13 @@ export default async function ReviewPage({ params }: { params: Promise<{ slug: s
           <div className="flex-1 w-full max-w-[540px]">
             <div className="relative aspect-square bg-white rounded-[48px] p-16 flex items-center justify-center border border-[#E5E4E1] shadow-2xl overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white to-[#F5F4F1] z-0" />
-              <img src={product.image} alt={product.name} className="w-full h-full object-contain transform hover:scale-110 transition-transform duration-700 relative z-10" />
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-contain transform hover:scale-110 transition-transform duration-700 relative z-10"
+                sizes="(max-width: 768px) 90vw, 540px"
+              />
             </div>
           </div>
         </div>

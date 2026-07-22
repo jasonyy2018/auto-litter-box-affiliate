@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Minus, Plus, ShoppingCart, ChevronRight, Truck, Shield, RotateCcw, Package, AlertTriangle } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import type { ShopProduct } from '@/lib/shopProducts';
@@ -150,10 +151,12 @@ export default function ShopProductDetailPage() {
                                 </div>
                             )}
                             {product.images[selectedImage] ? (
-                                <img
+                                <Image
                                     src={product.images[selectedImage]}
                                     alt={product.name}
-                                    className={`w-full h-full object-contain p-8 ${isDiscontinued ? 'grayscale' : ''}`}
+                                    fill
+                                    className={`object-contain p-8 ${isDiscontinued ? 'grayscale' : ''}`}
+                                    sizes="(max-width: 768px) 100vw, 50vw"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-text-muted">
@@ -170,7 +173,7 @@ export default function ShopProductDetailPage() {
                                         className={`w-20 h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${selectedImage === i ? 'border-primary-600 scale-105' : 'border-[#E5E4E1] hover:border-primary-300'
                                             }`}
                                     >
-                                        <img src={img} alt={`${product.name} ${i + 1}`} className={`w-full h-full object-cover ${isDiscontinued ? 'grayscale' : ''}`} />
+                                        <Image src={img} alt={`${product.name} ${i + 1}`} width={80} height={80} className={`w-full h-full object-cover ${isDiscontinued ? 'grayscale' : ''}`} />
                                     </button>
                                 ))}
                             </div>

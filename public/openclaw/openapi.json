@@ -248,6 +248,73 @@
         },
         "responses": { "200": { "description": "Publish result" } }
       }
+    },
+    "/api/admin/audit-logs": {
+      "get": {
+        "summary": "List audit logs",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer" } },
+          { "name": "source", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns paginated audit logs" }
+        }
+      },
+      "post": {
+        "summary": "Create an audit log entry",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": { "type": "string", "enum": ["admin", "openclaw", "webhook", "system"] },
+                  "action": { "type": "string" },
+                  "actor": { "type": "string" },
+                  "status": { "type": "string" },
+                  "duration": { "type": "integer" },
+                  "details": { "type": "object" }
+                },
+                "required": ["source", "action"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Log created" } }
+      }
+    },
+    "/api/webhooks/openclaw": {
+      "post": {
+        "summary": "Webhook callback for OpenClaw async tasks",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskId": { "type": "string" },
+                  "status": { "type": "string", "enum": ["completed", "failed", "running"] },
+                  "result": { "type": "object" },
+                  "error": { "type": "string" }
+                },
+                "required": ["taskId", "status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Webhook acknowledged" }
+        }
+      },
+      "get": {
+        "summary": "Health check for webhook endpoint",
+        "responses": {
+          "200": { "description": "Webhook endpoint is active" }
+        }
+      }
     }
   }
 }

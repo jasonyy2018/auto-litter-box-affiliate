@@ -1,0 +1,32 @@
+{
+  "name": "auto-litter-backend",
+  "version": "1.0.0",
+  "description": "Medusa.js backend for AutoLitterBox Pro e-commerce",
+  "private": true,
+  "scripts": {
+    "dev": "medusa develop",
+    "build": "medusa build",
+    "start": "medusa start",
+    "seed": "medusa exec -- ts-node src/seed.ts",
+    "migrate": "medusa migrations run"
+  },
+  "dependencies": {
+    "@medusajs/admin": "^7.1.0",
+    "@medusajs/cli": "^2.6.0",
+    "@medusajs/medusa": "^2.6.0",
+    "@medusajs/js-sdk": "^2.6.0",
+    "@medusajs/payment-paypal": "^2.0.0",
+    "@medusajs/fulfillment-manual": "^2.0.0",
+    "@medusajs/notification-sendgrid": "^2.0.0",
+    "@medusajs/medusa": "^2.6.0",
+    "typescript": "^5.5.0",
+    "ts-node": "^10.9.2",
+    "pg": "^8.13.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  }
+}

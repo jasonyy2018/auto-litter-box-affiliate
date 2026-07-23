@@ -254,8 +254,25 @@ model BlogPost {
   content     String   @db.Text // Store raw HTML or Markdown
   faqs        Json     @default("[]") // Array of {question: string, answer: string} objects
   published   Boolean  @default(true)
-  
+
   publishedAt DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ----------------------------------------------------------------------------
+// Audit Logging (Agent action history & Webhook events)
+// ----------------------------------------------------------------------------
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  source    String   // "admin" | "openclaw" | "webhook" | "system"
+  action    String   // e.g. "product.create", "order.update", "blog.delete"
+  actor     String?  // e.g. "admin@example.com" or "OpenClaw Agent"
+  details   Json?    // Full request payload / response summary
+  status    String   @default("success") // "success" | "error" | "pending"
+  ip        String?  // Request origin IP
+  duration  Int?     // Response time in ms
+
+  createdAt DateTime @default(now())
 }

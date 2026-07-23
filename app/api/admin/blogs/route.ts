@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { logAudit } from '@/lib/auditLog';
 
 function checkAuth(request: NextRequest): boolean {
     const authHeader = request.headers.get('authorization');
@@ -30,13 +31,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const start = Date.now();
     try {
         const body = await request.json();
-        
+
         let { slug, title, description, content, author, readTime } = body;
-        
+
         if (!slug) {
-             slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
         }
 
         const newBlog = await prisma.blogPost.create({
@@ -50,9 +52,22 @@ export async function POST(request: NextRequest) {
             }
         });
 
+        await logAudit({
+            source: 'admin',
+            action: 'blog.create',
+            actor: 'admin',
+            details: { blogId: newBlog.id, title, slug },
+            status: 'success',
+            duration: Date.now() - start,
+        });
+
         return NextResponse.json({ success: true, data: newBlog });
     } catch (error) {
         console.error('Create blog error:', error);
+        await logAudit({
+            source: 'admin', action: 'blog.create', status: 'error',
+            details: { error: String(error) }, duration: Date.now() - start,
+        });
         return NextResponse.json({ error: 'Failed to create blog' }, { status: 500 });
     }
 }
@@ -63,17 +78,17 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const start = Date.now();
     try {
         const body = await request.json();
         const { id, ...updates } = body;
+        if (!id) return NextResponse.json({ error: 'Blog ID required' }, { status: 400 });
 
-        if (!id) {
-            return NextResponse.json({ error: 'Blog ID required' }, { status: 400 });
-        }
+        const updatedBlog = await prisma.blogPost.update({ where: { id }, data: updates });
 
-        const updatedBlog = await prisma.blogPost.update({
-            where: { id },
-            data: updates
+        await logAudit({
+            source: 'admin', action: 'blog.update', status: 'success',
+            details: { blogId: id, updates }, duration: Date.now() - start,
         });
 
         return NextResponse.json({ success: true, data: updatedBlog });
@@ -89,15 +104,18 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const start = Date.now();
     try {
         const { searchParams } = new URL(request.url);
         const id = searchParams.get('id');
-
-        if (!id) {
-            return NextResponse.json({ error: 'Blog ID required' }, { status: 400 });
-        }
+        if (!id) return NextResponse.json({ error: 'Blog ID required' }, { status: 400 });
 
         await prisma.blogPost.delete({ where: { id } });
+
+        await logAudit({
+            source: 'admin', action: 'blog.delete', status: 'success',
+            details: { blogId: id }, duration: Date.now() - start,
+        });
 
         return NextResponse.json({ success: true });
     } catch (error) {

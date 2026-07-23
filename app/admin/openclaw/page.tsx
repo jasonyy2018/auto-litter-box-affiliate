@@ -97,6 +97,30 @@ export default function OpenClawTester() {
                 durationMs: duration,
                 data: data
             });
+
+            // Auto-log to audit trail
+            try {
+                await fetch('/api/admin/audit-logs', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${adminPass}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        source: 'openclaw',
+                        action: `api.${method}.${endpoint.replace(/\/api\//, '')}`,
+                        actor: 'OpenClaw Agent',
+                        status: res.ok ? 'success' : 'error',
+                        duration,
+                        details: {
+                            endpoint,
+                            method,
+                            statusCode: res.status,
+                            requestBody: payload ? JSON.parse(payload) : null,
+                        }
+                    })
+                });
+            } catch { /* silent */ }
         } catch (err: any) {
             setResponse({ error: err.message, status: 500 });
         } finally {

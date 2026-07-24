@@ -1,7 +1,8 @@
 FROM node:22-alpine AS builder
 
-# Install dependencies required by Prisma and then add pnpm
-RUN apk add --no-cache openssl
+# Configure reliable APK mirror and install dependencies required by Prisma
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories || true
+RUN apk add --no-cache --retries 5 --timeout 30 openssl || apk add --no-cache openssl
 RUN npm install -g pnpm@10
 
 WORKDIR /app
@@ -24,8 +25,9 @@ RUN pnpm build
 # ---
 FROM node:22-alpine AS runner
 
-# Install dependencies for runner
-RUN apk add --no-cache openssl
+# Configure reliable APK mirror and install dependencies for runner
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories || true
+RUN apk add --no-cache --retries 5 --timeout 30 openssl || apk add --no-cache openssl
 RUN npm install -g pnpm@10
 
 WORKDIR /app

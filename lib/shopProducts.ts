@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import fallbackProductsJson from '@/data/shop-products.json';
 
 // ====================== Type Exports ======================
 export interface ShopProduct {
@@ -41,6 +42,8 @@ export interface ShopVariant {
     properties: string;
     inStock: boolean;
 }
+
+const fallbackProducts: ShopProduct[] = fallbackProductsJson as ShopProduct[];
 
 // ====================== Mapping ======================
 
@@ -89,77 +92,109 @@ function mapProduct(p: any): ShopProduct {
     };
 }
 
-// Prisma model doesn't have cjStatus etc. — we store them in a JSON field
-// For now, we keep CJ-specific fields as part of the product record
-// by storing them in a dedicated json field or as part of tags/description
-// We'll use the Product model's built-in fields and store CJ status separately
-
 // ====================== Public API ======================
 
 export async function getAllShopProducts(): Promise<ShopProduct[]> {
-    const products = await prisma.product.findMany({
-        include: { variants: true, category: true },
-        orderBy: { createdAt: 'desc' },
-    });
-    return products.map(mapProduct);
+    try {
+        const products = await prisma.product.findMany({
+            include: { variants: true, category: true },
+            orderBy: { createdAt: 'desc' },
+        });
+        if (products.length > 0) return products.map(mapProduct);
+    } catch (e) {
+        console.warn('Prisma getAllShopProducts error, falling back to JSON data:', e);
+    }
+    return fallbackProducts;
 }
 
 export async function getVisibleProducts(): Promise<ShopProduct[]> {
-    const products = await prisma.product.findMany({
-        where: { visible: true },
-        include: { variants: true, category: true },
-        orderBy: { createdAt: 'desc' },
-    });
-    return products.map(mapProduct);
+    try {
+        const products = await prisma.product.findMany({
+            where: { visible: true },
+            include: { variants: true, category: true },
+            orderBy: { createdAt: 'desc' },
+        });
+        if (products.length > 0) return products.map(mapProduct);
+    } catch (e) {
+        console.warn('Prisma getVisibleProducts error, falling back to JSON data:', e);
+    }
+    return fallbackProducts.filter(p => p.visible !== false && p.cjStatus !== 'discontinued');
 }
 
 export async function getFeaturedProducts(): Promise<ShopProduct[]> {
-    const products = await prisma.product.findMany({
-        where: { visible: true, featured: true },
-        include: { variants: true, category: true },
-    });
-    return products.map(mapProduct);
+    try {
+        const products = await prisma.product.findMany({
+            where: { visible: true, featured: true },
+            include: { variants: true, category: true },
+        });
+        if (products.length > 0) return products.map(mapProduct);
+    } catch (e) {
+        console.warn('Prisma getFeaturedProducts error, falling back to JSON data:', e);
+    }
+    return fallbackProducts.filter(p => p.featured && p.visible !== false);
 }
 
 export async function getShopProductBySlug(slug: string): Promise<ShopProduct | undefined> {
-    const product = await prisma.product.findUnique({
-        where: { slug },
-        include: { variants: true, category: true },
-    });
-    return product ? mapProduct(product) : undefined;
+    try {
+        const product = await prisma.product.findUnique({
+            where: { slug },
+            include: { variants: true, category: true },
+        });
+        if (product) return mapProduct(product);
+    } catch (e) {
+        console.warn(`Prisma getShopProductBySlug(${slug}) error, checking JSON fallback:`, e);
+    }
+    return fallbackProducts.find(p => p.slug === slug);
 }
 
 export async function getShopProductById(id: string): Promise<ShopProduct | undefined> {
-    const product = await prisma.product.findUnique({
-        where: { id },
-        include: { variants: true, category: true },
-    });
-    return product ? mapProduct(product) : undefined;
+    try {
+        const product = await prisma.product.findUnique({
+            where: { id },
+            include: { variants: true, category: true },
+        });
+        if (product) return mapProduct(product);
+    } catch (e) {
+        console.warn(`Prisma getShopProductById(${id}) error, checking JSON fallback:`, e);
+    }
+    return fallbackProducts.find(p => p.id === id);
 }
 
 export async function addShopProduct(product: Omit<ShopProduct, 'id' | 'slug' | 'createdAt' | 'updatedAt'>): Promise<ShopProduct> {
     const { variants, category, ...productData } = product;
 
-    const created = await prisma.product.create({
-        data: {
-            ...productData as any,
-            categoryId: undefined,
-            variants: {
-                create: (variants || []).map((v: ShopVariant) => ({
-                    name: v.name,
-                    sku: v.sku,
-                    price: v.price,
-                    costPrice: v.costPrice,
-                    image: v.image,
-                    properties: v.properties,
-                    inStock: v.inStock,
-                })),
+    try {
+        const created = await prisma.product.create({
+            data: {
+                ...productData as any,
+                categoryId: undefined,
+                variants: {
+                    create: (variants || []).map((v: ShopVariant) => ({
+                        name: v.name,
+                        sku: v.sku,
+                        price: v.price,
+                        costPrice: v.costPrice,
+                        image: v.image,
+                        properties: v.properties,
+                        inStock: v.inStock,
+                    })),
+                },
             },
-        },
-        include: { variants: true, category: true },
-    });
-
-    return mapProduct(created);
+            include: { variants: true, category: true },
+        });
+        return mapProduct(created);
+    } catch (e) {
+        console.warn('Prisma addShopProduct fallback:', e);
+        const newProduct: ShopProduct = {
+            ...product,
+            id: `cj-${Date.now()}`,
+            slug: (product.name || 'product').toLowerCase().replace(/[^a-z0-9]/g, '-'),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+        fallbackProducts.unshift(newProduct);
+        return newProduct;
+    }
 }
 
 export async function addShopProducts(products: Array<Omit<ShopProduct, 'id' | 'slug' | 'createdAt' | 'updatedAt'>>): Promise<ShopProduct[]> {
@@ -181,6 +216,11 @@ export async function updateShopProduct(id: string, updates: Partial<ShopProduct
         });
         return mapProduct(updated);
     } catch {
+        const index = fallbackProducts.findIndex(p => p.id === id);
+        if (index !== -1) {
+            fallbackProducts[index] = { ...fallbackProducts[index], ...updates };
+            return fallbackProducts[index];
+        }
         return null;
     }
 }
@@ -193,8 +233,11 @@ export async function bulkUpdateProducts(updates: Record<string, Partial<ShopPro
                 where: { id },
                 data: safeUpdates as any,
             });
-        } catch (e) {
-            console.error(`Failed to update product ${id}:`, e);
+        } catch {
+            const index = fallbackProducts.findIndex(p => p.id === id);
+            if (index !== -1) {
+                fallbackProducts[index] = { ...fallbackProducts[index], ...update };
+            }
         }
     }
 }
@@ -204,22 +247,38 @@ export async function deleteShopProduct(id: string): Promise<boolean> {
         await prisma.product.delete({ where: { id } });
         return true;
     } catch {
+        const index = fallbackProducts.findIndex(p => p.id === id);
+        if (index !== -1) {
+            fallbackProducts.splice(index, 1);
+            return true;
+        }
         return false;
     }
 }
 
 export async function getProductsByCategory(category: string): Promise<ShopProduct[]> {
-    const products = await prisma.product.findMany({
-        where: { visible: true, category: { name: category } },
-        include: { variants: true, category: true },
-    });
-    return products.map(mapProduct);
+    try {
+        const products = await prisma.product.findMany({
+            where: { visible: true, category: { name: category } },
+            include: { variants: true, category: true },
+        });
+        if (products.length > 0) return products.map(mapProduct);
+    } catch (e) {
+        console.warn('Prisma getProductsByCategory error, fallback:', e);
+    }
+    return fallbackProducts.filter(p => p.category === category && p.visible !== false);
 }
 
 export async function getProductCategories(): Promise<string[]> {
-    const categories = await prisma.category.findMany({
-        select: { name: true },
-        orderBy: { name: 'asc' },
-    });
-    return categories.map(c => c.name);
+    try {
+        const categories = await prisma.category.findMany({
+            select: { name: true },
+            orderBy: { name: 'asc' },
+        });
+        if (categories.length > 0) return categories.map(c => c.name);
+    } catch (e) {
+        console.warn('Prisma getProductCategories error, fallback:', e);
+    }
+    const categories = Array.from(new Set(fallbackProducts.map(p => p.category))).sort();
+    return categories;
 }

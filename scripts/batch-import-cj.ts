@@ -24,7 +24,7 @@ async function main() {
     console.log('');
 
     // Get existing product IDs to avoid duplicates
-    const existing = getAllShopProducts();
+    const existing = await getAllShopProducts();
     const existingPids = new Set(existing.map(p => p.cjPid));
     console.log(`Existing products: ${existing.length} (${existingPids.size} unique CJ PIDs)`);
 
@@ -116,7 +116,7 @@ async function main() {
         tags: [],
     }));
 
-    const imported = addShopProducts(shopProducts);
+    const imported = await addShopProducts(shopProducts);
 
     console.log('');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

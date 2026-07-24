@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Generate product referral links
-        const products = getVisibleProducts();
+        const products = await getVisibleProducts();
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://autolitterboxpro.com';
         
         const referralLinks = products.map(p => ({

@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
         for (const item of items) {
             totalItems += item.quantity;
-            const product = getShopProductById(item.id);
+            const product = await getShopProductById(item.id);
             if (!product || !product.cjPid) {
                 // If it's a custom/local product without CJ sync, add to fallback shipping
                 continue;

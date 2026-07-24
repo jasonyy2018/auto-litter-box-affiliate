@@ -111,6 +111,11 @@ export function generateProductSchema(product: {
       price: product.price,
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
+      url: `${siteConfig.url}/reviews/${product.sku}`,
+      seller: {
+        '@type': 'Organization',
+        name: siteConfig.name,
+      },
     },
     aggregateRating: {
       '@type': 'AggregateRating',
@@ -119,6 +124,21 @@ export function generateProductSchema(product: {
       bestRating: 5,
       worstRating: 1,
     },
+    review: [
+      {
+        '@type': 'Review',
+        reviewRating: {
+          '@type': 'Rating',
+          ratingValue: product.rating,
+          bestRating: 5,
+        },
+        author: {
+          '@type': 'Organization',
+          name: 'AutoLitterBox Pro Expert Team',
+        },
+        reviewBody: product.description,
+      },
+    ],
   };
 }
 

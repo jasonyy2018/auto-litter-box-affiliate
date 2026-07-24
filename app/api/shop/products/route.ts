@@ -9,7 +9,10 @@ export async function GET(request: NextRequest) {
         const page = parseInt(searchParams.get('page') || '1');
         const size = parseInt(searchParams.get('size') || '20');
 
-        let products = getVisibleProducts();
+        let products = await getVisibleProducts();
+        
+        // Exclude discontinued CJ products
+        products = products.filter(p => p.cjStatus !== 'discontinued');
 
         // Filter by category
         if (category) {
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
         const total = products.length;
         const start = (page - 1) * size;
         const paginated = products.slice(start, start + size);
-        const categories = getProductCategories();
+        const categories = await getProductCategories();
 
         return NextResponse.json({
             success: true,

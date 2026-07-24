@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import SafeImage from './SafeImage';
 import { ShoppingCart, AlertTriangle } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import type { ShopProduct } from '@/lib/shopProducts';
@@ -62,7 +62,7 @@ export default function ShopProductCard({ product }: ShopProductCardProps) {
                         </div>
                     )}
                     {product.images[0] ? (
-                        <Image
+                        <SafeImage
                             src={product.images[0]}
                             alt={product.name}
                             fill

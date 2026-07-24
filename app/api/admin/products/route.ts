@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const products = getAllShopProducts();
+    const products = await getAllShopProducts();
     return NextResponse.json({ success: true, data: products });
 }
 
@@ -95,14 +95,14 @@ export async function POST(request: NextRequest) {
         const { cjProduct, cjProducts, customProduct } = body;
 
         if (customProduct) {
-            const newProduct = addShopProduct(customProduct);
+            const newProduct = await addShopProduct(customProduct);
             return NextResponse.json({ success: true, data: newProduct });
         }
 
         // Batch import from CJ
         if (cjProducts && Array.isArray(cjProducts)) {
             const batchProducts = cjProducts.map((cj: any) => processCJImportData(cj));
-            const newProducts = addShopProducts(batchProducts);
+            const newProducts = await addShopProducts(batchProducts);
             return NextResponse.json({ success: true, data: newProducts, imported: newProducts.length });
         }
 
@@ -138,7 +138,7 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: 'Product ID required' }, { status: 400 });
         }
 
-        const updated = updateShopProduct(id, updates);
+        const updated = await updateShopProduct(id, updates);
         if (!updated) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 });
         }
@@ -167,7 +167,7 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json({ error: 'Product ID required' }, { status: 400 });
         }
 
-        const deleted = deleteShopProduct(id);
+        const deleted = await deleteShopProduct(id);
         if (!deleted) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 });
         }

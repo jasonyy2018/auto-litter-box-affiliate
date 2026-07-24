@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Star, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
+import SafeImage from './SafeImage';
 import { Product } from '@/lib/products';
 import BuyButton from './BuyButton';
 import PinterestSaveButton from './PinterestSaveButton';
@@ -47,7 +47,7 @@ export default function ProductCard({ product, rank, variant = 'vertical' }: Pro
               description={`${product.name} - ${product.tagline} | $${product.price}`}
             />
           </div>
-          <Image
+          <SafeImage
             src={product.image}
             alt={product.name}
             width={400}
@@ -120,7 +120,7 @@ export default function ProductCard({ product, rank, variant = 'vertical' }: Pro
             description={`${product.name} - ${product.tagline} | $${product.price}`}
           />
         </div>
-        <Image
+        <SafeImage
           src={product.image}
           alt={product.name}
           fill

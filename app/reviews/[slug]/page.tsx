@@ -2,8 +2,10 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Star, ShieldCheck, CheckCircle2, XCircle, Clock, Smartphone, Zap, Sparkles, Award, Box, Info, Plus } from 'lucide-react';
-import Image from 'next/image';
-import { getProductBySlug, getAllProducts, getRelatedProducts } from '@/lib/products';
+import SafeImage from '@/components/SafeImage';
+import StickyMobileBuyBar from '@/components/StickyMobileBuyBar';
+import PriceAlertTrigger from '@/components/PriceAlertTrigger';
+import { getProductBySlug, getAllProducts } from '@/lib/products';
 import { generateMetadata as generateSeoMetadata, generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo';
 import Rating from '@/components/Rating';
 import BuyButton from '@/components/BuyButton';
@@ -20,10 +22,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const product = getProductBySlug(slug);
   if (!product) return {};
 
+  const ogUrl = `/api/og?title=${encodeURIComponent(`${product.name} Review 2026`)}&subtitle=${encodeURIComponent(product.tagline)}&price=${product.price}&badge=${encodeURIComponent(product.badge || 'Review')}`;
+
   return generateSeoMetadata({
     title: `${product.name} Review 2026 - Honest Expert Testing`,
     description: product.description,
     path: `/reviews/${product.slug}`,
+    image: ogUrl,
     type: 'article',
   });
 }
@@ -124,11 +129,12 @@ export default async function ReviewPage({ params }: { params: Promise<{ slug: s
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-5">
+            <div className="flex flex-wrap gap-5 items-center">
               <BuyButton productSlug={product.slug} productName={product.name} className="px-[48px] py-[20px] text-[18px] font-bold rounded-[16px] shadow-xl" />
+              <PriceAlertTrigger productName={product.name} productSlug={product.slug} price={product.price} />
               <Link
                 href="#full-review"
-                className="inline-flex items-center justify-center px-[48px] py-[20px] bg-white border-2 border-[#D1D0CD] text-[#1A1918] font-bold rounded-[16px] hover:bg-gray-50 transition-all active:scale-95"
+                className="inline-flex items-center justify-center px-[36px] py-[20px] bg-white border-2 border-[#D1D0CD] text-[#1A1918] font-bold rounded-[16px] hover:bg-gray-50 transition-all active:scale-95"
               >
                 Full Test Results
               </Link>
@@ -138,7 +144,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ slug: s
           <div className="flex-1 w-full max-w-[540px]">
             <div className="relative aspect-square bg-white rounded-[48px] p-16 flex items-center justify-center border border-[#E5E4E1] shadow-2xl overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-white to-[#F5F4F1] z-0" />
-              <Image
+              <SafeImage
                 src={product.image}
                 alt={product.name}
                 fill
@@ -301,6 +307,14 @@ export default async function ReviewPage({ params }: { params: Promise<{ slug: s
           <p className="mt-10 text-[12px] opacity-70">Checked daily for the best available prices.</p>
         </div>
       </section>
+
+      <StickyMobileBuyBar
+        productSlug={product.slug}
+        productName={product.name}
+        price={product.price}
+        rating={product.rating}
+        image={product.image}
+      />
     </div>
   );
 }

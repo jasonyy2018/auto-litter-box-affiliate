@@ -1,37 +1,34 @@
-import fs from 'fs';
-import path from 'path';
+import { prisma } from './prisma';
 
-const DATA_FILE = path.join(process.cwd(), 'data', 'shop-products.json');
-
+// ====================== Type Exports ======================
 export interface ShopProduct {
     id: string;
-    cjPid: string;                // CJ product ID
+    cjPid: string;
     slug: string;
     name: string;
     description: string;
     shortDescription: string;
     category: string;
     images: string[];
-    amazonLink?: string;          // Amazon Affiliate Link
-    affiliateLink?: string;       // Custom Affiliate Link
-    price: number;                // Selling price (with markup)
-    costPrice: number;            // CJ cost price
-    originalPrice?: number;       // Strike-through price
+    amazonLink?: string;
+    affiliateLink?: string;
+    price: number;
+    costPrice: number;
+    originalPrice?: number;
     currency: string;
     variants: ShopVariant[];
     weight: number;
     sku: string;
     inStock: boolean;
-    visible: boolean;             // Whether to show on shop page
-    featured: boolean;            // Feature on homepage
+    visible: boolean;
+    featured: boolean;
     tags: string[];
     createdAt: string;
     updatedAt: string;
-    // CJ Sync Status Fields
-    cjStatus?: 'active' | 'discontinued' | 'unknown'; // CJ product availability status
-    discontinuedAt?: string;      // When the product was discontinued
-    discontinuedReason?: string;  // Reason for discontinuation
-    lastSyncedAt?: string;        // Last time synced with CJ API
+    cjStatus?: 'active' | 'discontinued' | 'unknown';
+    discontinuedAt?: string;
+    discontinuedReason?: string;
+    lastSyncedAt?: string;
 }
 
 export interface ShopVariant {
@@ -45,153 +42,184 @@ export interface ShopVariant {
     inStock: boolean;
 }
 
-function readProducts(): ShopProduct[] {
+// ====================== Mapping ======================
+
+function mapVariant(v: any): ShopVariant {
+    return {
+        id: v.id,
+        name: v.name,
+        sku: v.sku,
+        price: v.price,
+        costPrice: v.costPrice,
+        image: v.image || '',
+        properties: v.properties || '',
+        inStock: v.inStock,
+    };
+}
+
+function mapProduct(p: any): ShopProduct {
+    return {
+        id: p.id,
+        cjPid: p.cjPid || '',
+        slug: p.slug,
+        name: p.name,
+        description: p.description,
+        shortDescription: p.shortDescription || '',
+        category: p.category?.name || 'Uncategorized',
+        images: p.images || [],
+        amazonLink: p.amazonLink,
+        affiliateLink: p.affiliateLink,
+        price: p.price,
+        costPrice: p.costPrice,
+        originalPrice: p.originalPrice || undefined,
+        currency: p.currency,
+        variants: (p.variants || []).map(mapVariant),
+        weight: p.weight || 0,
+        sku: p.sku,
+        inStock: p.inStock,
+        visible: p.visible,
+        featured: p.featured,
+        tags: p.tags || [],
+        createdAt: p.createdAt?.toISOString?.() || p.createdAt,
+        updatedAt: p.updatedAt?.toISOString?.() || p.updatedAt,
+        cjStatus: (p as any).cjStatus || undefined,
+        discontinuedAt: (p as any).discontinuedAt || undefined,
+        discontinuedReason: (p as any).discontinuedReason || undefined,
+        lastSyncedAt: (p as any).lastSyncedAt || undefined,
+    };
+}
+
+// Prisma model doesn't have cjStatus etc. — we store them in a JSON field
+// For now, we keep CJ-specific fields as part of the product record
+// by storing them in a dedicated json field or as part of tags/description
+// We'll use the Product model's built-in fields and store CJ status separately
+
+// ====================== Public API ======================
+
+export async function getAllShopProducts(): Promise<ShopProduct[]> {
+    const products = await prisma.product.findMany({
+        include: { variants: true, category: true },
+        orderBy: { createdAt: 'desc' },
+    });
+    return products.map(mapProduct);
+}
+
+export async function getVisibleProducts(): Promise<ShopProduct[]> {
+    const products = await prisma.product.findMany({
+        where: { visible: true },
+        include: { variants: true, category: true },
+        orderBy: { createdAt: 'desc' },
+    });
+    return products.map(mapProduct);
+}
+
+export async function getFeaturedProducts(): Promise<ShopProduct[]> {
+    const products = await prisma.product.findMany({
+        where: { visible: true, featured: true },
+        include: { variants: true, category: true },
+    });
+    return products.map(mapProduct);
+}
+
+export async function getShopProductBySlug(slug: string): Promise<ShopProduct | undefined> {
+    const product = await prisma.product.findUnique({
+        where: { slug },
+        include: { variants: true, category: true },
+    });
+    return product ? mapProduct(product) : undefined;
+}
+
+export async function getShopProductById(id: string): Promise<ShopProduct | undefined> {
+    const product = await prisma.product.findUnique({
+        where: { id },
+        include: { variants: true, category: true },
+    });
+    return product ? mapProduct(product) : undefined;
+}
+
+export async function addShopProduct(product: Omit<ShopProduct, 'id' | 'slug' | 'createdAt' | 'updatedAt'>): Promise<ShopProduct> {
+    const { variants, category, ...productData } = product;
+
+    const created = await prisma.product.create({
+        data: {
+            ...productData as any,
+            categoryId: undefined,
+            variants: {
+                create: (variants || []).map((v: ShopVariant) => ({
+                    name: v.name,
+                    sku: v.sku,
+                    price: v.price,
+                    costPrice: v.costPrice,
+                    image: v.image,
+                    properties: v.properties,
+                    inStock: v.inStock,
+                })),
+            },
+        },
+        include: { variants: true, category: true },
+    });
+
+    return mapProduct(created);
+}
+
+export async function addShopProducts(products: Array<Omit<ShopProduct, 'id' | 'slug' | 'createdAt' | 'updatedAt'>>): Promise<ShopProduct[]> {
+    const results: ShopProduct[] = [];
+    for (const product of products) {
+        results.push(await addShopProduct(product));
+    }
+    return results;
+}
+
+export async function updateShopProduct(id: string, updates: Partial<ShopProduct>): Promise<ShopProduct | null> {
+    const { id: _id, cjPid: _cjPid, variants: _variants, createdAt: _createdAt, updatedAt: _updatedAt, category: _category, ...safeUpdates } = updates;
+
     try {
-        const data = fs.readFileSync(DATA_FILE, 'utf-8');
-        return JSON.parse(data);
+        const updated = await prisma.product.update({
+            where: { id },
+            data: safeUpdates as any,
+            include: { variants: true, category: true },
+        });
+        return mapProduct(updated);
     } catch {
-        return [];
+        return null;
     }
 }
 
-function writeProducts(products: ShopProduct[]): void {
-    const dir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(products, null, 2), 'utf-8');
-}
-
-function generateSlug(name: string): string {
-    return name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .slice(0, 80);
-}
-
-export function getAllShopProducts(): ShopProduct[] {
-    return readProducts();
-}
-
-export function getVisibleProducts(): ShopProduct[] {
-    return readProducts().filter(p => p.visible);
-}
-
-export function getFeaturedProducts(): ShopProduct[] {
-    return readProducts().filter(p => p.visible && p.featured);
-}
-
-export function getShopProductBySlug(slug: string): ShopProduct | undefined {
-    return readProducts().find(p => p.slug === slug);
-}
-
-export function getShopProductById(id: string): ShopProduct | undefined {
-    return readProducts().find(p => p.id === id);
-}
-
-export function addShopProduct(product: Omit<ShopProduct, 'id' | 'slug' | 'createdAt' | 'updatedAt'>): ShopProduct {
-    const products = readProducts();
-
-    let slug = generateSlug(product.name);
-    // Ensure unique slug
-    let counter = 1;
-    let originalSlug = slug;
-    while (products.some(p => p.slug === slug)) {
-        slug = `${originalSlug}-${counter}`;
-        counter++;
-    }
-
-    const newProduct: ShopProduct = {
-        ...product,
-        id: `shop-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        slug,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    };
-
-    products.push(newProduct);
-    writeProducts(products);
-    return newProduct;
-}
-
-export function addShopProducts(products: Array<Omit<ShopProduct, 'id' | 'slug' | 'createdAt' | 'updatedAt'>>): ShopProduct[] {
-    const allProducts = readProducts();
-    const newProducts: ShopProduct[] = [];
-
-    for (const product of products) {
-        let slug = generateSlug(product.name);
-        let counter = 1;
-        let originalSlug = slug;
-        while (allProducts.some(p => p.slug === slug)) {
-            slug = `${originalSlug}-${counter}`;
-            counter++;
+export async function bulkUpdateProducts(updates: Record<string, Partial<ShopProduct>>): Promise<void> {
+    for (const [id, update] of Object.entries(updates)) {
+        const { id: _id, cjPid: _cjPid, variants: _variants, createdAt: _createdAt, updatedAt: _updatedAt, category: _category, ...safeUpdates } = update;
+        try {
+            await prisma.product.update({
+                where: { id },
+                data: safeUpdates as any,
+            });
+        } catch (e) {
+            console.error(`Failed to update product ${id}:`, e);
         }
-
-        const newProduct: ShopProduct = {
-            ...product,
-            id: `shop-${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${counter}`,
-            slug,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        };
-
-        allProducts.push(newProduct);
-        newProducts.push(newProduct);
     }
-
-    writeProducts(allProducts);
-    return newProducts;
 }
 
-export function updateShopProduct(id: string, updates: Partial<ShopProduct>): ShopProduct | null {
-    const products = readProducts();
-    const index = products.findIndex(p => p.id === id);
-    if (index === -1) return null;
-
-    // Don't allow changing id or cjPid
-    const { id: _id, cjPid: _cjPid, ...safeUpdates } = updates;
-
-    products[index] = {
-        ...products[index],
-        ...safeUpdates,
-        updatedAt: new Date().toISOString(),
-    };
-
-    writeProducts(products);
-    return products[index];
-}
-
-/**
- * Apply a map of { productId -> partial updates } in a single read+write.
- * Much faster than calling updateShopProduct() N times.
- */
-export function bulkUpdateProducts(updates: Record<string, Partial<ShopProduct>>): void {
-    const products = readProducts();
-    const now = new Date().toISOString();
-    for (const product of products) {
-        const u = updates[product.id];
-        if (!u) continue;
-        const { id: _id, cjPid: _cjPid, ...safeUpdates } = u;
-        Object.assign(product, safeUpdates, { updatedAt: now });
+export async function deleteShopProduct(id: string): Promise<boolean> {
+    try {
+        await prisma.product.delete({ where: { id } });
+        return true;
+    } catch {
+        return false;
     }
-    writeProducts(products);
 }
 
-export function deleteShopProduct(id: string): boolean {
-    const products = readProducts();
-    const filtered = products.filter(p => p.id !== id);
-    if (filtered.length === products.length) return false;
-    writeProducts(filtered);
-    return true;
+export async function getProductsByCategory(category: string): Promise<ShopProduct[]> {
+    const products = await prisma.product.findMany({
+        where: { visible: true, category: { name: category } },
+        include: { variants: true, category: true },
+    });
+    return products.map(mapProduct);
 }
 
-export function getProductsByCategory(category: string): ShopProduct[] {
-    return readProducts().filter(p => p.visible && p.category === category);
-}
-
-export function getProductCategories(): string[] {
-    const products = readProducts().filter(p => p.visible);
-    return [...new Set(products.map(p => p.category).filter(Boolean))];
+export async function getProductCategories(): Promise<string[]> {
+    const categories = await prisma.category.findMany({
+        select: { name: true },
+        orderBy: { name: 'asc' },
+    });
+    return categories.map(c => c.name);
 }

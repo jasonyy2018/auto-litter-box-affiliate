@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         const affiliates = getAffiliates();
         const referredOrders = getReferredOrders();
         const commissions = getCommissions();
-        const products = getVisibleProducts();
+        const products = await getVisibleProducts();
 
         // Map product details with custom rates
         const productRates = products.map(p => {

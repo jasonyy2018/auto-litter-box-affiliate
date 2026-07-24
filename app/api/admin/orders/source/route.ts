@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
         const cjProducts = [];
         for (const item of order.items) {
-            const product = getShopProductById(item.productId);
+            const product = await getShopProductById(item.productId);
             if (product && product.cjPid) {
                 let vid = '';
                 if (item.variantId && item.variantId !== 'cj-var-default') {

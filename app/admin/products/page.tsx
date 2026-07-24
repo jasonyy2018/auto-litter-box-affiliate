@@ -121,24 +121,46 @@ export default function AdminProductsPage() {
     }
 
     async function syncAllProducts() {
-        if (!confirm('将检查所有 CJ 商品的上架状态，已下架商品将自动隐藏。此操作可能需要几分钟，确认继续？')) return;
+        const cjProducts = products.filter(p => p.cjPid);
+        if (!cjProducts.length) {
+            alert('没有找到关联 CJ 的商品');
+            return;
+        }
+        if (!confirm(`将分批检查 ${cjProducts.length} 个 CJ 商品的上架状态、价格与描述。确认继续？`)) return;
         setSyncing(true);
-        setSyncMessage('正在同步商品状态...');
+
+        const chunkSize = 5;
+        let totalSynced = 0;
+        let totalDiscontinued = 0;
+        let totalErrors = 0;
+
         try {
-            const res = await fetch('/api/cj/sync-status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ autoHide: true }),
-            });
-            const data = await res.json();
-            if (data.success) {
-                const { synced, discontinued, errors } = data.data;
-                setSyncMessage(`✅ 同步完成：检查 ${synced} 个商品，${discontinued} 个已下架，${errors} 个错误`);
-                fetchProducts();
-                fetchSyncStatus();
-            } else {
-                setSyncMessage(`❌ 同步失败：${data.error}`);
+            for (let i = 0; i < cjProducts.length; i += chunkSize) {
+                const chunk = cjProducts.slice(i, i + chunkSize);
+                const chunkIds = chunk.map(p => p.id);
+                setSyncMessage(`⏳ 正在同步第 ${i + 1}-${Math.min(i + chunkSize, cjProducts.length)} / ${cjProducts.length} 个商品...`);
+
+                const res = await fetch('/api/cj/sync-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productIds: chunkIds, autoHide: true }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    totalSynced += data.data.synced;
+                    totalDiscontinued += data.data.discontinued;
+                    totalErrors += data.data.errors;
+                }
+
+                // Pause 600ms between batches to honor CJ rate limits
+                if (i + chunkSize < cjProducts.length) {
+                    await new Promise(r => setTimeout(r, 600));
+                }
             }
+
+            setSyncMessage(`✅ 同步完成：检查 ${totalSynced} 个商品，${totalDiscontinued} 个下架，${totalErrors} 个未查到`);
+            fetchProducts();
+            fetchSyncStatus();
         } catch (error) {
             setSyncMessage(`❌ 同步出错：${error instanceof Error ? error.message : '未知错误'}`);
         } finally {

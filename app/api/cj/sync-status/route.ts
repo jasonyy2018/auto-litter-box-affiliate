@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkProductStatus, getProductDetail } from '@/lib/cjApi';
+import { getProductDetail } from '@/lib/cjApi';
 import { getAllShopProducts, bulkUpdateProducts } from '@/lib/shopProducts';
 
 function getDynamicMarkup(cost: number): number {
@@ -51,25 +51,24 @@ export async function POST(request: NextRequest) {
 
         const results = await pLimit(
             productsToSync.map((product, index) => async () => {
-                if (index > 0) await new Promise(r => setTimeout(r, 350));
+                if (index > 0) await new Promise(r => setTimeout(r, 400));
                 const previousStatus = product.cjStatus || 'unknown';
-                try {
-                    const statusResult = await checkProductStatus(product.cjPid);
 
-                    if (statusResult.status === 'discontinued') {
-                        await bulkUpdateProducts({
-                            [product.id]: {
-                                cjStatus: 'discontinued',
-                                lastSyncedAt: new Date().toISOString(),
-                                discontinuedAt: new Date().toISOString(),
-                                discontinuedReason: statusResult.reason || 'Discontinued on CJ',
-                                visible: false,
-                            } as any,
-                        });
-                        return { id: product.id, name: product.name, cjPid: product.cjPid, previousStatus, newStatus: 'discontinued' };
+                const fetchWithRetry = async (retries = 1): Promise<any> => {
+                    try {
+                        return await getProductDetail(product.cjPid);
+                    } catch (err: any) {
+                        const msg = (err?.message || '').toLowerCase();
+                        if (retries > 0 && (msg.includes('rate') || msg.includes('timeout') || msg.includes('proxy') || msg.includes('frequent'))) {
+                            await new Promise(r => setTimeout(r, 1200));
+                            return fetchWithRetry(retries - 1);
+                        }
+                        throw err;
                     }
+                };
 
-                    const detail = await getProductDetail(product.cjPid);
+                try {
+                    const detail = await fetchWithRetry();
                     const now = new Date().toISOString();
 
                     // Price sync
@@ -110,13 +109,36 @@ export async function POST(request: NextRequest) {
                         descriptionUpdated: descUpdated,
                     };
                 } catch (err: any) {
+                    const msg = (err?.message || '').toLowerCase();
+                    const isDiscontinued =
+                        msg.includes('not found') ||
+                        msg.includes('does not exist') ||
+                        msg.includes('no product') ||
+                        msg.includes('invalid') ||
+                        msg.includes('offline') ||
+                        msg.includes('下架') ||
+                        msg.includes('不存在');
+
+                    if (isDiscontinued) {
+                        await bulkUpdateProducts({
+                            [product.id]: {
+                                cjStatus: 'discontinued',
+                                lastSyncedAt: new Date().toISOString(),
+                                discontinuedAt: new Date().toISOString(),
+                                discontinuedReason: `CJ API: ${err.message}`,
+                                visible: false,
+                            } as any,
+                        });
+                        return { id: product.id, name: product.name, cjPid: product.cjPid, previousStatus, newStatus: 'discontinued' };
+                    }
+
                     return {
                         id: product.id, name: product.name, cjPid: product.cjPid,
                         previousStatus, newStatus: 'unknown', reason: err.message,
                     };
                 }
             }),
-            2
+            1
         );
 
         return NextResponse.json({

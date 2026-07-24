@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image, { ImageProps } from 'next/image';
-import { Box, Cat } from 'lucide-react';
+import { Cat } from 'lucide-react';
 
 interface SafeImageProps extends Omit<ImageProps, 'onError' | 'src'> {
     src?: string | null;
@@ -28,10 +28,18 @@ export default function SafeImage({
     const [hasError, setHasError] = useState<boolean>(!src);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    const isExternalCdn = typeof imgSrc === 'string' && (
-        imgSrc.includes('cbu01.alicdn.com') ||
-        imgSrc.includes('cjdropshipping.com') ||
-        imgSrc.includes('alicdn.com')
+    useEffect(() => {
+        if (src) {
+            setImgSrc(src);
+            setHasError(false);
+            setIsLoading(true);
+        }
+    }, [src]);
+
+    const isExternal = typeof imgSrc === 'string' && (
+        imgSrc.startsWith('http://') ||
+        imgSrc.startsWith('https://') ||
+        imgSrc.startsWith('//')
     );
 
     const handleError = () => {
@@ -64,7 +72,7 @@ export default function SafeImage({
                 className={`${className} transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                 onLoad={() => setIsLoading(false)}
                 onError={handleError}
-                unoptimized={isExternalCdn}
+                unoptimized={isExternal}
             />
         </div>
     );

@@ -100,7 +100,7 @@ export default function HomePage() {
           <div className="relative animate-fade-in-up delay-400">
             <div className="relative aspect-4/3 rounded-[40px] overflow-hidden shadow-2xl border-8 border-white bg-slate-900">
               <VideoWithFallback
-                videoSrc="https://assets.mixkit.co/videos/preview/mixkit-cat-resting-on-a-chair-42095-large.mp4"
+                videoSrc="/videos/smart-litter-box-demo.mp4"
                 fallbackSrc="https://images.unsplash.com/photo-1585692181606-4e3c8d7b5c3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
                 alt="Automatic self-cleaning litter box in action"
                 className="w-full h-full object-cover"

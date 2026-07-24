@@ -113,6 +113,9 @@ export function mapCJVariants(rawVariants: CJVariantInput[], productSku: string,
         let name = v.variantNameEn || v.variantName || v.variantProperty || `Option ${i + 1}`;
         name = name.replace(/^CJ[A-Z0-9]+-/i, '').trim();
 
+        let image = v.variantImage || '';
+        if (image.startsWith('//')) image = 'https:' + image;
+
         return {
             id: v.vid || `cj-var-${i}`,
             name,
@@ -120,26 +123,61 @@ export function mapCJVariants(rawVariants: CJVariantInput[], productSku: string,
             price,
             costPrice,
             originalPrice,
-            image: v.variantImage || '',
+            image,
             properties: v.variantProperty || name,
             inStock: v.inStock !== false,
         };
     });
 }
 
-// Merge main image, productImageSet, and variant images into a complete gallery
-export function enrichProductImages(mainImage?: string, imageSet?: string[], variants?: any[]): string[] {
-    const images: string[] = [];
-    if (mainImage) images.push(mainImage);
-    if (Array.isArray(imageSet)) {
-        imageSet.forEach(img => {
-            if (img && !images.includes(img)) images.push(img);
-        });
-    }
+// Robustly parse and merge main image, productImageSet (even stringified JSON arrays), and variant images
+export function enrichProductImages(mainImage?: string, imageSet?: any, variants?: any[]): string[] {
+    const rawImages: string[] = [];
+
+    const parseImageInput = (input: any) => {
+        if (!input) return;
+        if (Array.isArray(input)) {
+            input.forEach(parseImageInput);
+        } else if (typeof input === 'string') {
+            const trimmed = input.trim();
+            if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(parseImageInput);
+                        return;
+                    }
+                } catch {
+                    // Ignore parse error if not JSON
+                }
+            }
+            if (trimmed.includes(',') && !trimmed.startsWith('http')) {
+                trimmed.split(',').forEach(img => parseImageInput(img.trim()));
+                return;
+            }
+            let url = trimmed;
+            if (url.startsWith('//')) url = 'https:' + url;
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                rawImages.push(url);
+            }
+        }
+    };
+
+    parseImageInput(mainImage);
+    parseImageInput(imageSet);
+
     if (Array.isArray(variants)) {
         variants.forEach(v => {
-            if (v.image && !images.includes(v.image)) images.push(v.image);
+            if (v && v.image) parseImageInput(v.image);
         });
     }
-    return images.filter(Boolean).map(url => url.startsWith('//') ? 'https:' + url : url);
+
+    const uniqueImages: string[] = [];
+    rawImages.forEach(img => {
+        if (img && !uniqueImages.includes(img)) {
+            uniqueImages.push(img);
+        }
+    });
+
+    return uniqueImages;
 }

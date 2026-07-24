@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Outfit } from 'next/font/google';
 import '@/styles/globals.css';
 import { Header, Footer, LayoutWrapper } from '@/components';
 import AuthProvider from '@/components/AuthProvider';
@@ -8,12 +7,6 @@ import { CartProvider } from '@/lib/CartContext';
 import { siteConfig } from '@/lib/seo';
 import AffiliateTracker from '@/components/AffiliateTracker';
 import SocialProofToast from '@/components/SocialProofToast';
-
-const outfit = Outfit({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-outfit',
-});
 
 export const metadata: Metadata = {
   title: {
@@ -56,6 +49,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -91,7 +87,7 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className={`${outfit.variable} min-h-screen flex flex-col font-sans antialiased text-text-primary bg-white`} suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col font-sans antialiased text-text-primary bg-white" suppressHydrationWarning>
         <AuthProvider>
           <CartProvider>
             <AffiliateTracker />

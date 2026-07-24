@@ -316,10 +316,10 @@ export default function ShopProductDetailPage() {
                     </div>
                 </div>
 
-                {/* Chewy Bundle Builder: Frequently Bought Together */}
+                {/* ALitter Smart Bundle Builder: Frequently Bought Together */}
                 <FrequentlyBoughtTogether mainProduct={product} />
 
-                {/* Chewy Feature Standards Grid */}
+                {/* ALitter Feature Standards Grid */}
                 <ProductHighlightsGrid />
 
                 {/* Description */}

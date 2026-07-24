@@ -111,7 +111,7 @@ export const CatProfileSelector: React.FC = () => {
                 rating: 4.9,
                 reviewsCount: 186,
                 image: 'https://oss-cf.cjdropshipping.com/product/2026/01/16/05/2ba585fa-1b3a-4d1d-af02-6edb2d516ff2_trans.jpeg',
-                highlight: '#1 Overall Chewy Pick',
+                highlight: '#1 ALitter Top Pick',
                 reason: 'Triple odor lock sealed drawer, 35dB quiet motor, and 15-day hands-free operation.',
             },
             {
@@ -137,7 +137,7 @@ export const CatProfileSelector: React.FC = () => {
                 <span className="p-2 bg-primary-100 text-primary-700 rounded-xl">
                     <Cat className="w-6 h-6" />
                 </span>
-                <span className="text-xs font-bold uppercase tracking-wider text-primary-600">Chewy-Style Pet Matcher</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-primary-600">ALitter Smart Pet Matcher</span>
             </div>
             <h2 className="text-2xl lg:text-3xl font-extrabold text-text-primary tracking-tight mb-3">
                 Find the Perfect Litter Box for Your Cat
@@ -285,7 +285,7 @@ export const CatProfileSelector: React.FC = () => {
 
                     <div className="mt-5 pt-4 border-t border-[#E5E4E1] flex items-center justify-between text-xs text-text-secondary">
                         <span className="flex items-center gap-1.5">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 365-Day Chewy-Style Guarantee
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 365-Day ALitter Guarantee
                         </span>
                         <Link href="/shop" className="font-bold text-primary-600 hover:underline">
                             View All Litter Boxes &rarr;

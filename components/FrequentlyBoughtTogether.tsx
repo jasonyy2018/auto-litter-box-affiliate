@@ -95,7 +95,7 @@ export const FrequentlyBoughtTogether: React.FC<FrequentlyBoughtTogetherProps> =
                     </span>
                     <div>
                         <h3 className="font-extrabold text-xl text-text-primary">Frequently Bought Together</h3>
-                        <p className="text-xs text-text-secondary">Chewy Bundle Saver: Add essential liners & odor filters to save extra 10%</p>
+                        <p className="text-xs text-text-secondary">ALitter Smart Bundle: Add essential liners & odor filters to save extra 10%</p>
                     </div>
                 </div>
                 {isFullBundle && (

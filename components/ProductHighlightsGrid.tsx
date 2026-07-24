@@ -55,7 +55,7 @@ export const ProductHighlightsGrid: React.FC = () => {
                 <span className="p-2 bg-primary-100 text-primary-700 rounded-xl">
                     <Award className="w-5 h-5" />
                 </span>
-                <span className="text-xs font-bold uppercase tracking-wider text-primary-600">Chewy Feature Standards</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-primary-600">ALitter Quality Standards</span>
             </div>
             <h2 className="text-2xl lg:text-3xl font-extrabold text-text-primary tracking-tight mb-8">
                 Why Pet Parents Love Our Smart Litter Boxes

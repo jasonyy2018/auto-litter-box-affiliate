@@ -22,14 +22,14 @@ const Header = () => {
 
     return (
         <header className="sticky top-0 z-50 bg-white border-b border-[#E5E4E1] shadow-sm font-sans">
-            {/* Chewy Top Announcement Bar */}
+            {/* ALitter Top Announcement Bar */}
             <div className="bg-slate-900 text-white text-[12px] py-1.5 px-4 text-center border-b border-slate-800">
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
                     <span className="hidden md:inline font-medium text-slate-300">
-                        🐾 <strong className="text-amber-400">Chewy Guarantee:</strong> Free 1-3 Day Express Shipping on Orders $49+
+                        🐾 <strong className="text-amber-400">ALitter Guarantee:</strong> Free 1-3 Day Express Shipping on Orders $49+
                     </span>
                     <span className="mx-auto md:mx-0 font-semibold tracking-wide">
-                        ⚡ Use Code <strong className="text-primary-400 font-extrabold underline underline-offset-2">CHEWY35</strong> for 35% OFF Autoship & Supplies
+                        ⚡ Use Code <strong className="text-primary-400 font-extrabold underline underline-offset-2">ALITTER35</strong> for 35% OFF Autoship & Supplies
                     </span>
                     <span className="hidden lg:inline text-slate-300 font-medium">
                         📞 24/7 Pet Care Support: <strong className="text-white">1-800-672-4399</strong>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductDetail } from '@/lib/cjApi';
 import { getAllShopProducts, bulkUpdateProducts } from '@/lib/shopProducts';
+import { sanitizeCJDescription, mapCJVariants } from '@/lib/cjSanitizer';
 
 function getDynamicMarkup(cost: number): number {
     if (cost < 10) return 3.5;
@@ -83,9 +84,13 @@ export async function POST(request: NextRequest) {
                     const newPrice = parseFloat((newCostPrice * getDynamicMarkup(newCostPrice)).toFixed(2));
                     const priceChanged = newPrice !== product.price;
 
-                    // Description sync
-                    const newDesc = detail.description || detail.productBrief || '';
-                    const descUpdated = newDesc && newDesc !== product.description;
+                    // Description sync with HTML sanitizer
+                    const rawDesc = detail.description || detail.productBrief || '';
+                    const cleanDesc = sanitizeCJDescription(rawDesc);
+                    const descUpdated = Boolean(cleanDesc && cleanDesc !== product.description);
+
+                    // Variant sync
+                    const mappedVariants = mapCJVariants(detail.variants || [], detail.productSku || product.sku, newCostPrice, getDynamicMarkup);
 
                     // Build updates
                     const updates: Record<string, any> = {
@@ -96,7 +101,9 @@ export async function POST(request: NextRequest) {
                         originalPrice: parseFloat((newPrice * 1.2).toFixed(2)),
                         name: detail.productNameEn || detail.productName || product.name,
                     };
-                    if (descUpdated) updates.description = newDesc;
+
+                    if (descUpdated) updates.description = cleanDesc;
+                    if (mappedVariants.length > 0) updates.variants = mappedVariants;
                     if (detail.productImageSet?.length) updates.images = detail.productImageSet;
                     if (detail.productWeight) updates.weight = detail.productWeight;
 
@@ -107,6 +114,7 @@ export async function POST(request: NextRequest) {
                         previousStatus, newStatus: 'active',
                         priceChanged: priceChanged ? `$${product.price} → $${newPrice}` : undefined,
                         descriptionUpdated: descUpdated,
+                        variantsCount: mappedVariants.length,
                     };
                 } catch (err: any) {
                     const msg = (err?.message || '').toLowerCase();

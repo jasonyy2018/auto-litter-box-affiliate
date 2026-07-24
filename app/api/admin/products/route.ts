@@ -32,6 +32,8 @@ function getDynamicMarkup(cost: number): number {
     return 1.6;                      // High-end boxes: 1.6x markup (e.g. $426 item -> $681.60)
 }
 
+import { sanitizeCJDescription, mapCJVariants } from '@/lib/cjSanitizer';
+
 function processCJImportData(cj: any) {
     const variantCosts = (cj.variants || []).map((v: any) => v.variantSellPrice);
     const maxCost = Math.max(...variantCosts, cj.sellPrice || 0);
@@ -47,25 +49,15 @@ function processCJImportData(cj: any) {
     const dynamicMarkup = getDynamicMarkup(costPrice);
     const sellingPrice = parseFloat((costPrice * dynamicMarkup).toFixed(2));
 
-    const variants = (cj.variants || []).map((v: any) => {
-        const vMarkup = getDynamicMarkup(v.variantSellPrice);
-        return {
-            id: v.vid,
-            name: v.variantNameEn || v.variantName,
-            sku: v.variantSku,
-            price: parseFloat((v.variantSellPrice * vMarkup).toFixed(2)),
-            costPrice: v.variantSellPrice,
-            image: v.variantImage || '',
-            properties: v.variantProperty || '',
-            inStock: true,
-        };
-    });
+    const variants = mapCJVariants(cj.variants || [], cj.productSku || cj.pid, costPrice, getDynamicMarkup);
+    const rawDesc = cj.description || cj.productBrief || '';
+    const description = sanitizeCJDescription(rawDesc);
 
     return {
         cjPid: cj.pid,
         name: cj.productNameEn || cj.productName,
-        description: cj.description || cj.productBrief || '',
-        shortDescription: cj.productBrief || cj.productNameEn || '',
+        description,
+        shortDescription: (cj.productBrief || cj.productNameEn || '').slice(0, 200),
         category: cj.categoryName || 'Uncategorized',
         images: cj.productImageSet?.length > 0
             ? cj.productImageSet
@@ -75,8 +67,8 @@ function processCJImportData(cj: any) {
         originalPrice: parseFloat((sellingPrice * 1.2).toFixed(2)),
         currency: 'USD',
         variants,
-        weight: cj.productWeight,
-        sku: cj.productSku,
+        weight: cj.productWeight || 0,
+        sku: cj.productSku || `CJ-${cj.pid}`,
         inStock: true,
         visible: true,
         featured: false,

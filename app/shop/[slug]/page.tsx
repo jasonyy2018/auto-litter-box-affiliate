@@ -8,6 +8,8 @@ import { Minus, Plus, ShoppingCart, ChevronRight, Truck, Shield, RotateCcw, Pack
 import { useCart } from '@/lib/CartContext';
 import type { ShopProduct } from '@/lib/shopProducts';
 import ShopProductCard from '@/components/ShopProductCard';
+import FrequentlyBoughtTogether from '@/components/FrequentlyBoughtTogether';
+import ProductHighlightsGrid from '@/components/ProductHighlightsGrid';
 
 export default function ShopProductDetailPage() {
     const params = useParams();
@@ -313,6 +315,12 @@ export default function ShopProductDetailPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Chewy Bundle Builder: Frequently Bought Together */}
+                <FrequentlyBoughtTogether mainProduct={product} />
+
+                {/* Chewy Feature Standards Grid */}
+                <ProductHighlightsGrid />
 
                 {/* Description */}
                 {product.description && (

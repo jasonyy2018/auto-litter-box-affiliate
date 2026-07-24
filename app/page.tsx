@@ -7,10 +7,13 @@ import ProductCard from '@/components/ProductCard';
 import ComparisonTable from '@/components/ComparisonTable';
 import FAQ from '@/components/FAQ';
 import Breadcrumb from '@/components/Breadcrumb';
+import ChewyTrustBar from '@/components/ChewyTrustBar';
+import CatProfileSelector from '@/components/CatProfileSelector';
+import ProductHighlightsGrid from '@/components/ProductHighlightsGrid';
 
 export const metadata: Metadata = generateSeoMetadata({
-  title: 'Best Automatic Litter Boxes 2026 - Expert Reviews & Comparisons',
-  description: 'Find the best automatic litter box for your cat in 2026. Expert reviews, side-by-side comparisons, and buying guides.',
+  title: 'Best Automatic Litter Boxes 2026 - Chewy Verified Reviews & Shop',
+  description: 'Find the best automatic litter box for your cat in 2026. Chewy-style expert reviews, pet profile recommendations, and side-by-side comparisons.',
   path: '/',
 });
 
@@ -44,9 +47,11 @@ export default function HomePage() {
 
   return (
     <div className="bg-surface-bg">
+      {/* Chewy Trust Signals Banner */}
+      <ChewyTrustBar />
+
       {/* Hero Section */}
-      {/* Hero Section */}
-      <section className="py-12 lg:py-24 px-6 lg:px-20 relative overflow-hidden">
+      <section className="py-12 lg:py-20 px-6 lg:px-20 relative overflow-hidden">
         <div className="max-w-[1400px] mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Content */}
           <div className="flex flex-col items-start text-left">
@@ -172,6 +177,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Chewy Pet Profile Selector & Product Highlights */}
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-20">
+        <CatProfileSelector />
+        <ProductHighlightsGrid />
+      </div>
 
       {/* Testimonials Section */}
       <section className="py-24 px-6 lg:px-20 bg-white">

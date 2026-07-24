@@ -10,6 +10,7 @@ import Breadcrumb from '@/components/Breadcrumb';
 import ALitterTrustBar from '@/components/ALitterTrustBar';
 import CatProfileSelector from '@/components/CatProfileSelector';
 import ProductHighlightsGrid from '@/components/ProductHighlightsGrid';
+import VideoWithFallback from '@/components/VideoWithFallback';
 
 export const metadata: Metadata = generateSeoMetadata({
   title: 'Best Automatic Litter Boxes 2026 - ALitter Verified Reviews & Shop',
@@ -95,18 +96,25 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Right Image */}
+          {/* Right Video Showcase */}
           <div className="relative animate-fade-in-up delay-400">
-            <div className="relative aspect-4/3 rounded-[40px] overflow-hidden shadow-2xl border-8 border-white bg-surface-bg">
-              <img
-                src="https://images.unsplash.com/photo-1585692181606-4e3c8d7b5c3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-                alt="Automatic self-cleaning litter box for cats"
-                width={600}
-                height={450}
+            <div className="relative aspect-4/3 rounded-[40px] overflow-hidden shadow-2xl border-8 border-white bg-slate-900">
+              <VideoWithFallback
+                videoSrc="https://assets.mixkit.co/videos/preview/mixkit-cat-resting-on-a-chair-42095-large.mp4"
+                fallbackSrc="https://images.unsplash.com/photo-1585692181606-4e3c8d7b5c3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+                alt="Automatic self-cleaning litter box in action"
                 className="w-full h-full object-cover"
-                loading="eager"
-                fetchPriority="high"
               />
+              {/* Floating Badge Overlay */}
+              <div className="absolute bottom-4 left-4 right-4 p-3 bg-white/90 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                  <span className="text-xs font-extrabold text-text-primary">Live Demo: 3-Min Auto Clean Cycle</span>
+                </div>
+                <span className="text-[10px] font-bold bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full uppercase">
+                  Whisper Quiet
+                </span>
+              </div>
             </div>
           </div>
         </div>

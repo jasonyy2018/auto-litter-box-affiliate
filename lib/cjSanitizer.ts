@@ -1,11 +1,34 @@
 /**
- * CJ Dropshipping HTML Description & Variant Sanitizer Helper
+ * CJ Dropshipping HTML Description, Plain Text Sanitizer & Variant Sync Helper
  */
+
+// Helper to decode HTML entities (e.g. &lt;p&gt; -> <p>)
+export function decodeHTMLEntities(str: string): string {
+    if (!str) return '';
+    return str
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, ' ');
+}
+
+// Strip all HTML tags to produce clean plain text for short descriptions & card previews
+export function stripHtmlTags(str: string): string {
+    if (!str) return '';
+    const decoded = decodeHTMLEntities(str);
+    return decoded
+        .replace(/<[^>]*>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
 
 export function sanitizeCJDescription(raw: string): string {
     if (!raw) return '';
 
-    let html = raw.trim();
+    // First, decode any double-escaped entities
+    let html = decodeHTMLEntities(raw.trim());
 
     // 1. If raw string is plain text (no HTML tags), wrap paragraphs
     if (!/<[a-z][\s\S]*>/i.test(html)) {
@@ -81,13 +104,13 @@ export function mapCJVariants(rawVariants: CJVariantInput[], productSku: string,
 
     return rawVariants.map((v, i) => {
         const rawCost = typeof v.variantSellPrice === 'string' ? parseFloat(v.variantSellPrice) : (v.variantSellPrice || basePrice || 0);
-        const costPrice = isNaN(rawCost) ? basePrice : rawCost;
+        const costPrice = isNaN(rawCost) || rawCost <= 0 ? basePrice : rawCost;
         const markup = getMarkupFn(costPrice);
         const price = parseFloat((costPrice * markup).toFixed(2));
+        const originalPrice = parseFloat((price * 1.2).toFixed(2));
 
         // Format clean variant name
         let name = v.variantNameEn || v.variantName || v.variantProperty || `Option ${i + 1}`;
-        // Remove redundant SKU prefixes if CJ formats variant name as "SKU-Color"
         name = name.replace(/^CJ[A-Z0-9]+-/i, '').trim();
 
         return {
@@ -96,9 +119,27 @@ export function mapCJVariants(rawVariants: CJVariantInput[], productSku: string,
             sku: v.variantSku || `${productSku}-V${i}`,
             price,
             costPrice,
+            originalPrice,
             image: v.variantImage || '',
             properties: v.variantProperty || name,
             inStock: v.inStock !== false,
         };
     });
+}
+
+// Merge main image, productImageSet, and variant images into a complete gallery
+export function enrichProductImages(mainImage?: string, imageSet?: string[], variants?: any[]): string[] {
+    const images: string[] = [];
+    if (mainImage) images.push(mainImage);
+    if (Array.isArray(imageSet)) {
+        imageSet.forEach(img => {
+            if (img && !images.includes(img)) images.push(img);
+        });
+    }
+    if (Array.isArray(variants)) {
+        variants.forEach(v => {
+            if (v.image && !images.includes(v.image)) images.push(v.image);
+        });
+    }
+    return images.filter(Boolean).map(url => url.startsWith('//') ? 'https:' + url : url);
 }

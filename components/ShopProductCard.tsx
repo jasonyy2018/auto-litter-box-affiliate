@@ -5,6 +5,7 @@ import SafeImage from './SafeImage';
 import { ShoppingCart, AlertTriangle } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import type { ShopProduct } from '@/lib/shopProducts';
+import { stripHtmlTags } from '@/lib/cjSanitizer';
 
 interface ShopProductCardProps {
     product: ShopProduct;
@@ -96,7 +97,7 @@ export default function ShopProductCard({ product }: ShopProductCardProps) {
                         {product.name}
                     </h3>
                     <p className="text-sm text-text-secondary line-clamp-2 mb-4 leading-relaxed">
-                        {product.shortDescription}
+                        {stripHtmlTags(product.shortDescription || product.description)}
                     </p>
 
                     <div className="mt-auto flex items-center justify-between">

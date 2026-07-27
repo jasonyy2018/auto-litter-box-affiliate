@@ -31,9 +31,6 @@ const Header = () => {
                     <span className="mx-auto md:mx-0 font-semibold tracking-wide">
                         ⚡ Use Code <strong className="text-primary-400 font-extrabold underline underline-offset-2">ALITTER35</strong> for 35% OFF Autoship & Supplies
                     </span>
-                    <span className="hidden lg:inline text-slate-300 font-medium">
-                        📞 24/7 Pet Care Support: <strong className="text-white">1-800-672-4399</strong>
-                    </span>
                 </div>
             </div>
 
